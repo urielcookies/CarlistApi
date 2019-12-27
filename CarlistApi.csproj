@@ -109,6 +109,14 @@
     <Compile Include="Migrations\201912270612087_AddUserAccountsTable1.designer.cs">
       <DependentUpon>201912270612087_AddUserAccountsTable1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201912270655262_ChangeCreatedTimeNullable.cs" />
+    <Compile Include="Migrations\201912270655262_ChangeCreatedTimeNullable.designer.cs">
+      <DependentUpon>201912270655262_ChangeCreatedTimeNullable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201912270711584_NoNullCreatedTime.cs" />
+    <Compile Include="Migrations\201912270711584_NoNullCreatedTime.designer.cs">
+      <DependentUpon>201912270711584_NoNullCreatedTime.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\CarAccess.cs" />
     <Compile Include="Models\CarExpenses.cs" />
@@ -138,6 +146,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201912270612087_AddUserAccountsTable1.resx">
       <DependentUpon>201912270612087_AddUserAccountsTable1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201912270655262_ChangeCreatedTimeNullable.resx">
+      <DependentUpon>201912270655262_ChangeCreatedTimeNullable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201912270711584_NoNullCreatedTime.resx">
+      <DependentUpon>201912270711584_NoNullCreatedTime.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
