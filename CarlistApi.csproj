@@ -51,6 +51,18 @@
       <HintPath>packages\EntityFramework.6.4.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.JsonWebTokens.5.6.0\lib\net461\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Logging, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Logging.5.6.0\lib\net461\Microsoft.IdentityModel.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Tokens, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Tokens.5.6.0\lib\net461\Microsoft.IdentityModel.Tokens.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\System.IdentityModel.Tokens.Jwt.5.6.0\lib\net461\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+    </Reference>
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -97,6 +109,8 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Managers\IAuthService.cs" />
+    <Compile Include="Managers\JWTService.cs" />
     <Compile Include="Migrations\201912270559184_InitialCreate.cs" />
     <Compile Include="Migrations\201912270559184_InitialCreate.designer.cs">
       <DependentUpon>201912270559184_InitialCreate.cs</DependentUpon>
@@ -122,6 +136,8 @@
     <Compile Include="Models\CarExpenses.cs" />
     <Compile Include="Models\CarInformation.cs" />
     <Compile Include="Models\CarStatus.cs" />
+    <Compile Include="Models\IAuthContainerModel.cs" />
+    <Compile Include="Models\JWTContainerModel.cs" />
     <Compile Include="Models\UserAccounts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
