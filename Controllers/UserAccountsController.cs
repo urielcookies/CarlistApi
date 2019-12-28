@@ -83,7 +83,7 @@ namespace CarlistApi.Controllers
             var username = userAccounts.Username;
             var email = userAccounts.Email;
 
-            if(!IsValidEmail(email))
+            if (!IsValidEmail(email))
             {
                 return BadRequest("Fix email format");
             }
@@ -111,7 +111,36 @@ namespace CarlistApi.Controllers
             db.UserAccounts.Add(newUser);
             db.SaveChanges();
 
-            return Ok(newUser);
+            return Ok(HttpStatusCode.Created);
+        }
+
+        // POST: api/useraccounts/login
+        [Route("api/useraccounts/login")]
+        public IHttpActionResult Login(UserAccounts userAccounts)
+        {
+            var email = userAccounts.Email;
+            var password = userAccounts.Password;
+
+            var user = db.UserAccounts.SingleOrDefault(ua => ua.Email == email);
+            if (user == null)
+            {
+                return BadRequest("Email or password are incorrect");
+            }
+
+            var verified = Crypto.VerifyHashedPassword(user.Password, password);
+            if (!verified)
+            {
+                return BadRequest("Email or password are incorrect");
+            }
+
+            IAuthContainerModel model = GetJWTContainerModel(email);
+            IAuthService authService = new JWTService(model.SecretKey);
+            string jwtToken = authService.GenerateToken(model);
+
+            HttpCookie token = new HttpCookie("token");
+            token.Value = jwtToken;
+            HttpContext.Current.Response.Cookies.Add(token);
+            return Ok(HttpStatusCode.Accepted);
         }
 
         // POST: api/UserAccounts

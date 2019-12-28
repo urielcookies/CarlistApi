@@ -12,6 +12,7 @@ namespace CarlistApi.Controllers
     public class CarInformationController : ApiController
     {
         CarlistDbContext carlistDbContext = new CarlistDbContext();
+
         // GET: api/CarInformation/
         public IHttpActionResult Get()
         {
