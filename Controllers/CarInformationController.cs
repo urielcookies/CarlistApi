@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
+using System.Web;
 using System.Web.Http;
+using AuthenticationService.Managers;
+using AuthenticationService.Models;
 using CarlistApi.data;
 using CarlistApi.Models;
 
@@ -12,12 +16,35 @@ namespace CarlistApi.Controllers
     public class CarInformationController : ApiController
     {
         CarlistDbContext carlistDbContext = new CarlistDbContext();
-
+        // check token and check for email match in database to allow access
         // GET: api/CarInformation/
         public IHttpActionResult Get()
         {
-            var carlistInfo = carlistDbContext.CarInformation;
-            return Ok(carlistInfo);
+            HttpCookie cookie = HttpContext.Current.Request.Cookies["token"];
+            if (cookie != null)
+            {
+                // use try/catch control for errors when token has been tampered
+
+                IAuthContainerModel model = GetJWTContainerModel("uriel621@live.com");
+                IAuthService authService = new JWTService(model.SecretKey);
+
+                var token = cookie.Value;
+                List<Claim> claims = authService.GetTokenClaims(token).ToList();
+                var email = claims.FirstOrDefault(e => e.Type.Equals(ClaimTypes.Email)).Value;
+
+                var user = carlistDbContext.UserAccounts.SingleOrDefault(ua => ua.Email == email);
+                List<object> usersCars = new List<object>();
+
+                foreach (var carRow in carlistDbContext.CarInformation)
+                {
+                    usersCars.Add(carRow);
+                }
+
+                return Ok(usersCars);
+            } else
+            {
+                return BadRequest("No token");
+            }
         }
 
         // GET: api/CarInformation/5
@@ -90,6 +117,17 @@ namespace CarlistApi.Controllers
             carlistDbContext.CarInformation.Remove(carInfo);
             carlistDbContext.SaveChanges();
             return Ok("Record deleted");
+        }
+
+        private static JWTContainerModel GetJWTContainerModel(string email)
+        {
+            return new JWTContainerModel()
+            {
+                Claims = new Claim[]
+                {
+                    new Claim(ClaimTypes.Email, email)
+                }
+            };
         }
     }
 }
