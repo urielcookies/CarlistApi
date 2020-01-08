@@ -10,6 +10,7 @@ using AuthenticationService.Managers;
 using AuthenticationService.Models;
 using CarlistApi.data;
 using CarlistApi.Models;
+using CarlistApi.Utils;
 
 namespace CarlistApi.Controllers
 {
@@ -20,21 +21,12 @@ namespace CarlistApi.Controllers
         // GET: api/CarInformation/
         public IHttpActionResult Get()
         {
-            HttpCookie cookie = HttpContext.Current.Request.Cookies["token"];
-            if (cookie != null)
+            var utils = new Helper();
+            if (utils.isAuthorized(carlistDbContext))
             {
-                // use try/catch control for errors when token has been tampered
-
-                IAuthContainerModel model = GetJWTContainerModel("uriel621@live.com");
-                IAuthService authService = new JWTService(model.SecretKey);
-
-                var token = cookie.Value;
-                List<Claim> claims = authService.GetTokenClaims(token).ToList();
-                var email = claims.FirstOrDefault(e => e.Type.Equals(ClaimTypes.Email)).Value;
-
-                var user = carlistDbContext.UserAccounts.SingleOrDefault(ua => ua.Email == email);
                 List<object> usersCars = new List<object>();
 
+                // Need to retrieve own users cars instead of all
                 foreach (var carRow in carlistDbContext.CarInformation)
                 {
                     usersCars.Add(carRow);
@@ -43,7 +35,28 @@ namespace CarlistApi.Controllers
                 return Ok(usersCars);
             } else
             {
-                return BadRequest("No token");
+                return BadRequest("Bad token");
+            }
+        }
+
+        // GET: api/CarInformation/
+        [Route("api/carinformation/access-other-cars")]
+        public IHttpActionResult GetAccessCars()
+        {
+            var utils = new Helper();
+            var currentUser = utils.currentUser(carlistDbContext);
+            if (utils.isAuthorized(carlistDbContext))
+            {
+                var queryCarIds = carlistDbContext.CarAccess
+                   .Where(s => s.UserAccountId == currentUser.Id).Select(x => x.CarInformationId); ;
+
+                var permittedCars = carlistDbContext.CarInformation.Where(m => queryCarIds.Contains(m.Id));
+
+                return Ok(permittedCars);
+            }
+            else
+            {
+                return BadRequest("Bad token");
             }
         }
 
