@@ -22,15 +22,11 @@ namespace CarlistApi.Controllers
         public IHttpActionResult Get()
         {
             var utils = new Helper();
+            var currentUser = utils.currentUser(carlistDbContext);
             if (utils.isAuthorized(carlistDbContext))
             {
-                List<object> usersCars = new List<object>();
-
-                // Need to retrieve own users cars instead of all
-                foreach (var carRow in carlistDbContext.CarInformation)
-                {
-                    usersCars.Add(carRow);
-                }
+                var usersCars = carlistDbContext.CarInformation
+                                .Where(m => currentUser.Id == m.UserAccountId);
 
                 return Ok(usersCars);
             } else
@@ -48,9 +44,11 @@ namespace CarlistApi.Controllers
             if (utils.isAuthorized(carlistDbContext))
             {
                 var queryCarIds = carlistDbContext.CarAccess
-                   .Where(s => s.UserAccountId == currentUser.Id).Select(x => x.CarInformationId); ;
+                   .Where(s => s.UserAccountId == currentUser.Id)
+                   .Select(x => x.CarInformationId); ;
 
-                var permittedCars = carlistDbContext.CarInformation.Where(m => queryCarIds.Contains(m.Id));
+                var permittedCars = carlistDbContext.CarInformation
+                    .Where(m => queryCarIds.Contains(m.Id));
 
                 return Ok(permittedCars);
             }
