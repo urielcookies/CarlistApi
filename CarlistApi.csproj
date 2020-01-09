@@ -107,6 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\CarExpensesController.cs" />
     <Compile Include="Controllers\CarInformationController.cs" />
     <Compile Include="Controllers\UserAccountsController.cs" />
     <Compile Include="Data\CarlistDbContext.cs" />
