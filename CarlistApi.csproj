@@ -140,6 +140,22 @@
     <Compile Include="Migrations\201912280413259_hi.designer.cs">
       <DependentUpon>201912280413259_hi.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202001100344433_Changecolumn.cs" />
+    <Compile Include="Migrations\202001100344433_Changecolumn.designer.cs">
+      <DependentUpon>202001100344433_Changecolumn.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202001100346318_AddMoneyAnnotation.cs" />
+    <Compile Include="Migrations\202001100346318_AddMoneyAnnotation.designer.cs">
+      <DependentUpon>202001100346318_AddMoneyAnnotation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202001100349007_ChangeDatatypeDoubleToDecimal.cs" />
+    <Compile Include="Migrations\202001100349007_ChangeDatatypeDoubleToDecimal.designer.cs">
+      <DependentUpon>202001100349007_ChangeDatatypeDoubleToDecimal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202001100351027_ChangeDatatypeDoubleToDecimalCarStatus.cs" />
+    <Compile Include="Migrations\202001100351027_ChangeDatatypeDoubleToDecimalCarStatus.designer.cs">
+      <DependentUpon>202001100351027_ChangeDatatypeDoubleToDecimalCarStatus.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\CarAccess.cs" />
     <Compile Include="Models\CarExpenses.cs" />
@@ -181,6 +197,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201912280413259_hi.resx">
       <DependentUpon>201912280413259_hi.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202001100344433_Changecolumn.resx">
+      <DependentUpon>202001100344433_Changecolumn.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202001100346318_AddMoneyAnnotation.resx">
+      <DependentUpon>202001100346318_AddMoneyAnnotation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202001100349007_ChangeDatatypeDoubleToDecimal.resx">
+      <DependentUpon>202001100349007_ChangeDatatypeDoubleToDecimal.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202001100351027_ChangeDatatypeDoubleToDecimalCarStatus.resx">
+      <DependentUpon>202001100351027_ChangeDatatypeDoubleToDecimalCarStatus.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
