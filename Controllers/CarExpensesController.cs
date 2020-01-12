@@ -24,6 +24,24 @@ namespace CarlistApi.Controllers
             return db.CarExpenses;
         }
 
+        // GET: api/CarExpenses/
+        [Route("api/carexpenses/{carInformationId}")]
+        public IHttpActionResult GetSingleCarExpenses(int carInformationId)
+        {
+            var utils = new Helper();
+            if (utils.isAuthorized(db))
+            {
+                var carExpense = db.CarExpenses
+                   .Where(s => s.CarInformationId == carInformationId);
+
+                return Ok(carExpense);
+            }
+            else
+            {
+                return BadRequest("Bad token");
+            }
+        }
+
         // GET: api/CarExpenses/5
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult GetCarExpenses(int id)
