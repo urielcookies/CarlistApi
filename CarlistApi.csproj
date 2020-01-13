@@ -102,6 +102,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="default.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -110,7 +111,7 @@
     <Compile Include="Controllers\CarExpensesController.cs" />
     <Compile Include="Controllers\CarInformationController.cs" />
     <Compile Include="Controllers\UserAccountsController.cs" />
-    <Compile Include="Data\CarlistContext.cs" />
+    <Compile Include="Data\CarlistDbContext.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

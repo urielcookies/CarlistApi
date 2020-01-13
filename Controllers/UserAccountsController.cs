@@ -140,7 +140,7 @@ namespace CarlistApi.Controllers
             HttpCookie token = new HttpCookie("token");
             token.Value = jwtToken;
             HttpContext.Current.Response.Cookies.Add(token);
-            return Ok(HttpStatusCode.Accepted);
+            return Ok(jwtToken);
         }
 
         // POST: api/UserAccounts
