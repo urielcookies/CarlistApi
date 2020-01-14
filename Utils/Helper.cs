@@ -15,6 +15,7 @@ namespace CarlistApi.Utils
     {
         public bool isAuthorized(CarlistDbContext db)
         {
+
             HttpCookie cookie = HttpContext.Current.Request.Cookies["token"];
             if (cookie != null)
             {
