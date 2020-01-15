@@ -12,6 +12,9 @@ namespace CarlistApi
         {
             // Web API configuration and services
 
+            // Enable Cors
+            config.EnableCors();
+
             // Web API routes
             config.MapHttpAttributeRoutes();
 

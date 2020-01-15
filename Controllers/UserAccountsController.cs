@@ -15,6 +15,7 @@ using System.Web;
 using AuthenticationService.Models;
 using AuthenticationService.Managers;
 using System.Security.Claims;
+using System.Web.Http.Cors;
 
 namespace CarlistApi.Controllers
 {
@@ -115,6 +116,7 @@ namespace CarlistApi.Controllers
         }
 
         // POST: api/useraccounts/login
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
         [Route("api/useraccounts/login")]
         public IHttpActionResult Login(UserAccounts userAccounts)
         {
@@ -138,7 +140,10 @@ namespace CarlistApi.Controllers
             string jwtToken = authService.GenerateToken(model);
 
             HttpCookie token = new HttpCookie("token");
+            token.HttpOnly = true;
             token.Value = jwtToken;
+            token.SameSite = (SameSiteMode)(1);
+            token.Domain = Request.RequestUri.Host;
             HttpContext.Current.Response.Cookies.Add(token);
             return Ok(jwtToken);
         }

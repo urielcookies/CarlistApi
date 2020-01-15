@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using AuthenticationService.Managers;
 using AuthenticationService.Models;
 using CarlistApi.data;
@@ -19,6 +20,7 @@ namespace CarlistApi.Controllers
         CarlistDbContext carlistDbContext = new CarlistDbContext();
         // check token and check for email match in database to allow access
         // GET: api/CarInformation/
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
         public IHttpActionResult Get()
         {
             var utils = new Helper();

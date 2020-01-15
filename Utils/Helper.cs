@@ -16,10 +16,13 @@ namespace CarlistApi.Utils
         public bool isAuthorized(CarlistDbContext db)
         {
 
-            HttpCookie cookie = HttpContext.Current.Request.Cookies["token"];
-            if (cookie != null)
+            // Not recieving cookies so trying to get JWT through headers
+            // var tokenCookie = HttpContext.Current.Request.Cookies["token"];
+
+            var tokenCookie = HttpContext.Current.Request.Headers["token"];
+            if (tokenCookie != null)
             {
-                var tokenCookie = HttpContext.Current.Request.Cookies["token"].Value;
+                // var tokenCookie = HttpContext.Current.Request.Cookies["token"].Value;
                 var jwtToken = new JwtSecurityToken(tokenCookie);
                 var tokenEmail = jwtToken.Claims.First(c => c.Type == "email").Value;
 
@@ -46,7 +49,10 @@ namespace CarlistApi.Utils
 
         public UserAccounts currentUser(CarlistDbContext db)
         {
-            var tokenCookie = HttpContext.Current.Request.Cookies["token"].Value;
+            // Not recieving cookies so trying to get JWT through headers
+            // var tokenCookie = HttpContext.Current.Request.Cookies["token"].Value;
+
+            var tokenCookie = HttpContext.Current.Request.Headers["token"];
             var jwtToken = new JwtSecurityToken(tokenCookie);
             var tokenEmail = jwtToken.Claims.First(c => c.Type == "email").Value;
 
