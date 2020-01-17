@@ -16,6 +16,7 @@ using AuthenticationService.Models;
 using AuthenticationService.Managers;
 using System.Security.Claims;
 using System.Web.Http.Cors;
+using CarlistApi.Utils;
 
 namespace CarlistApi.Controllers
 {
@@ -148,6 +149,37 @@ namespace CarlistApi.Controllers
             return Ok(jwtToken);
         }
 
+        [HttpPut]
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
+        [Route("api/useraccounts/changePassword")]
+        [ResponseType(typeof(UserAccounts))]
+        public IHttpActionResult ChangePassword([FromBody]UserInfo passwords)
+        {
+            var utils = new Helper();
+            if (utils.isAuthorized(db))
+            {
+                var currentUser = utils.currentUser(db);
+                var currentPassword = passwords.currentPassword;
+                var newPassword = passwords.newPassword;
+
+                var verified = Crypto.VerifyHashedPassword(currentUser.Password, currentPassword);
+                if (verified)
+                {
+                    currentUser.Password = Crypto.HashPassword(newPassword);
+                    db.SaveChanges();
+                    return Ok(HttpStatusCode.OK);
+                }
+                else
+                {
+                    return BadRequest("Could not verify password");
+                }
+            }
+            else
+            {
+                return BadRequest("Bad token");
+            }
+        }
+
         // POST: api/UserAccounts
         [ResponseType(typeof(UserAccounts))]
         public IHttpActionResult PostUserAccounts(UserAccounts userAccounts)
@@ -215,6 +247,12 @@ namespace CarlistApi.Controllers
                     new Claim(ClaimTypes.Email, email)
                 }
             };
+        }
+
+        public class UserInfo
+        {
+            public String currentPassword { get; set; }
+            public String newPassword { get; set; }
         }
     }
 }

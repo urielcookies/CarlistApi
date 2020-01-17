@@ -20,7 +20,7 @@ namespace CarlistApi.Utils
             // var tokenCookie = HttpContext.Current.Request.Cookies["token"];
 
             var tokenCookie = HttpContext.Current.Request.Headers["token"];
-            if (tokenCookie != null)
+            if (tokenCookie != null && tokenCookie.Length != 0)
             {
                 // var tokenCookie = HttpContext.Current.Request.Cookies["token"].Value;
                 var jwtToken = new JwtSecurityToken(tokenCookie);

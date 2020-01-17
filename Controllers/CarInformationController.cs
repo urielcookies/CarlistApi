@@ -24,9 +24,9 @@ namespace CarlistApi.Controllers
         public IHttpActionResult Get()
         {
             var utils = new Helper();
-            var currentUser = utils.currentUser(carlistDbContext);
             if (utils.isAuthorized(carlistDbContext))
             {
+                var currentUser = utils.currentUser(carlistDbContext);
                 var usersCars = carlistDbContext.CarInformation
                                 .Where(m => currentUser.Id == m.UserAccountId);
 
@@ -38,13 +38,14 @@ namespace CarlistApi.Controllers
         }
 
         // GET: api/CarInformation/
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
         [Route("api/carinformation/access-other-cars")]
         public IHttpActionResult GetAccessCars()
         {
             var utils = new Helper();
-            var currentUser = utils.currentUser(carlistDbContext);
             if (utils.isAuthorized(carlistDbContext))
             {
+                var currentUser = utils.currentUser(carlistDbContext);
                 var queryCarIds = carlistDbContext.CarAccess
                    .Where(s => s.UserAccountId == currentUser.Id)
                    .Select(x => x.CarInformationId); ;

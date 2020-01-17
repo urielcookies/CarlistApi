@@ -11,6 +11,7 @@ using System.Web.Http.Description;
 using CarlistApi.Models;
 using CarlistApi.data;
 using CarlistApi.Utils;
+using System.Web.Http.Cors;
 
 namespace CarlistApi.Controllers
 {
@@ -22,9 +23,10 @@ namespace CarlistApi.Controllers
         public IQueryable<CarExpenses> GetCarExpenses()
         {
             return db.CarExpenses;
-        }
+        } 
 
         // GET: api/CarExpenses/
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
         [Route("api/carexpenses/{carInformationId}")]
         public IHttpActionResult GetSingleCarExpenses(int carInformationId)
         {
@@ -100,10 +102,9 @@ namespace CarlistApi.Controllers
             }
 
             var utils = new Helper();
-            var currentUser = utils.currentUser(db);
-
             if (utils.isAuthorized(db))
             {
+                var currentUser = utils.currentUser(db);
                 var newExpense = new CarExpenses
                 {
                     UserAccountId = currentUser.Id,
