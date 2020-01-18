@@ -93,13 +93,16 @@ namespace CarlistApi.Controllers
         }
 
         // POST: api/CarExpenses
+        [HttpPost]
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
+        [Route("api/carexpenses")]
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult PostCarExpenses(CarExpenses carExpenses)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState);
+            //}
 
             var utils = new Helper();
             if (utils.isAuthorized(db))
@@ -125,6 +128,9 @@ namespace CarlistApi.Controllers
         }
 
         // DELETE: api/CarExpenses/5
+        [HttpDelete]
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
+        [Route("api/carexpenses/{id}")]
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult DeleteCarExpenses(int id)
         {
@@ -137,7 +143,7 @@ namespace CarlistApi.Controllers
             db.CarExpenses.Remove(carExpenses);
             db.SaveChanges();
 
-            return Ok(carExpenses);
+            return Ok(HttpStatusCode.OK);
         }
 
         protected override void Dispose(bool disposing)
