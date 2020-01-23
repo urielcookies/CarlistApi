@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using System.Web.Http.Description;
 using AuthenticationService.Managers;
 using AuthenticationService.Models;
 using CarlistApi.data;
@@ -54,6 +55,25 @@ namespace CarlistApi.Controllers
                     .Where(m => queryCarIds.Contains(m.Id));
 
                 return Ok(permittedCars);
+            }
+            else
+            {
+                return BadRequest("Bad token");
+            }
+        }
+
+        // GET: api/CarAccess
+        [HttpGet]
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
+        [Route("api/carinformation/getusercars/{userId}")]
+        [ResponseType(typeof(CarExpenses))]
+        public IHttpActionResult GetUserCars(int userId)
+        {
+            var utils = new Helper();
+            if (utils.isAuthorized(carlistDbContext))
+            {
+                var userCars = carlistDbContext.CarInformation.Where(s => s.UserAccountId == userId);
+                return Ok(userCars);
             }
             else
             {

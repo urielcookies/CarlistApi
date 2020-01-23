@@ -28,9 +28,9 @@ namespace CarlistApi.Controllers
         // GET: api/CarAccess
         [HttpGet]
         [EnableCors(origins: "*", headers: "*", methods: "*")]
-        [Route("api/caraccess/getcars")]
+        [Route("api/caraccess/getusernames")]
         [ResponseType(typeof(CarExpenses))]
-        public IHttpActionResult PostCarExpenses(CarExpenses carExpenses)
+        public IHttpActionResult GetUsersNames()
         {
             var utils = new Helper();
             if (utils.isAuthorized(db))
@@ -48,7 +48,7 @@ namespace CarlistApi.Controllers
 
                 var users = db.UserAccounts
                     .Where(m => permittedCars.Contains(m.Id))
-                    .Select(x => new { x.Id, x.Username});
+                    .Select(x => new { x.Id, x.Username, x.Email});
 
                 // show car lots with this.
                 // then make a POST call in carInfoContr to 
