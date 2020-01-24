@@ -50,9 +50,6 @@ namespace CarlistApi.Controllers
                     .Where(m => permittedCars.Contains(m.Id))
                     .Select(x => new { x.Id, x.Username, x.Email});
 
-                // show car lots with this.
-                // then make a POST call in carInfoContr to 
-                // recieve all cars beloinging to userId
                 return Ok(users);
             }
             else
