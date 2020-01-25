@@ -93,6 +93,53 @@ namespace CarlistApi.Controllers
             }
         }
 
+        // GET: api/CarAccess
+        [HttpGet]
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
+        [Route("api/carinformation/get-other-carinfo/{carId}")]
+        [ResponseType(typeof(CarExpenses))]
+        public IHttpActionResult GetOtherCarInfo(int carId)
+        {
+            var utils = new Helper();
+            if (utils.isAuthorized(carlistDbContext))
+            {
+                var currentUser = utils.currentUser(carlistDbContext);
+
+                var queryCarIds = carlistDbContext.CarAccess
+                    .Where(s => s.UserAccountId == currentUser.Id)
+                    .Select(x => x.CarInformationId);
+
+                var carInfo = carlistDbContext.CarInformation
+                    .FirstOrDefault(m => queryCarIds.Contains(m.Id) && m.Id == carId);
+
+                return Ok(carInfo);
+            }
+            else
+            {
+                return BadRequest("Bad token");
+            }
+        }
+
+        // GET: api/CarAccess
+        [HttpGet]
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
+        [Route("api/carinformation/get-carinfo/{carId}")]
+        [ResponseType(typeof(CarExpenses))]
+        public IHttpActionResult GetCarInfo(int carId)
+        {
+            var utils = new Helper();
+            if (utils.isAuthorized(carlistDbContext))
+            {
+                var carInfo = carlistDbContext.CarInformation.FirstOrDefault(m => m.Id == carId);
+
+                return Ok(carInfo);
+            }
+            else
+            {
+                return BadRequest("Bad token");
+            }
+        }
+
         // GET: api/CarInformation/5
         public IHttpActionResult Get(int id)
         {
