@@ -180,6 +180,31 @@ namespace CarlistApi.Controllers
             }
         }
 
+        [HttpGet]
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
+        [Route("api/useraccounts/getuserinfo")]
+        [ResponseType(typeof(UserAccounts))]
+        public IHttpActionResult GetUserInfo()
+        {
+            var utils = new Helper();
+            if (utils.isAuthorized(db))
+            {
+                var currentUser = utils.currentUser(db);
+                var publicAccountInfo = new PublicAccountInfo
+                {
+                    Id = currentUser.Id,
+                    Username = currentUser.Username,
+                    Email = currentUser.Email,
+                    CreatedTime = currentUser.CreatedTime,
+                };
+                return Ok(publicAccountInfo);
+            }
+            else
+            {
+                return BadRequest("Bad token");
+            }
+        }
+
         // POST: api/UserAccounts
         [ResponseType(typeof(UserAccounts))]
         public IHttpActionResult PostUserAccounts(UserAccounts userAccounts)
@@ -253,6 +278,14 @@ namespace CarlistApi.Controllers
         {
             public String currentPassword { get; set; }
             public String newPassword { get; set; }
+        }
+
+        public class PublicAccountInfo
+        {
+            public int Id { get; set; }
+            public String Username { get; set; }
+            public String Email { get; set; }
+            public DateTime CreatedTime { get; set; }
         }
     }
 }

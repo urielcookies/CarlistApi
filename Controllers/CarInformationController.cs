@@ -65,15 +65,27 @@ namespace CarlistApi.Controllers
         // GET: api/CarAccess
         [HttpGet]
         [EnableCors(origins: "*", headers: "*", methods: "*")]
-        [Route("api/carinformation/getusercars/{userId}")]
+        [Route("api/carinformation/get-users-cars/{userId}")]
         [ResponseType(typeof(CarExpenses))]
-        public IHttpActionResult GetUserCars(int userId)
+        public IHttpActionResult GetUsersCars(int userId)
         {
             var utils = new Helper();
             if (utils.isAuthorized(carlistDbContext))
             {
-                var userCars = carlistDbContext.CarInformation.Where(s => s.UserAccountId == userId);
-                return Ok(userCars);
+                var currentUser = utils.currentUser(carlistDbContext);
+
+                var queryCarIds = carlistDbContext.CarInformation
+                    .Where(s => s.UserAccountId == userId)
+                    .Select(x => x.Id);
+
+                var permittedCarsIds = carlistDbContext.CarAccess
+                    .Where(m => m.UserAccountId == currentUser.Id && queryCarIds.Contains(m.CarInformationId))
+                    .Select(x => x.CarInformationId);
+
+                var permittedCars = carlistDbContext.CarInformation
+                    .Where(s => permittedCarsIds.Contains(s.Id));
+
+                return Ok(permittedCars);
             }
             else
             {
