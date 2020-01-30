@@ -33,10 +33,26 @@ namespace CarlistApi.Controllers
             var utils = new Helper();
             if (utils.isAuthorized(db))
             {
-                var carExpense = db.CarExpenses
-                   .Where(s => s.CarInformationId == carInformationId);
+                var currentUser = utils.currentUser(db);
 
-                return Ok(carExpense);
+                var hasAccess = db.CarInformation
+                    .Any(c => c.Id == carInformationId && c.UserAccountId == currentUser.Id);
+
+                if(!hasAccess)
+                {
+                    hasAccess = db.CarAccess
+                        .Any(c => c.CarInformationId == carInformationId && c.UserAccountId == currentUser.Id);
+                }
+
+                
+                if (hasAccess)
+                {
+                    IQueryable expenseList = db.CarExpenses.Where(s => s.CarInformationId == carInformationId);
+                    return Ok(expenseList);
+                } else
+                {
+                    return BadRequest("You have no access to this car or the car does not exist");
+                }
             }
             else
             {
