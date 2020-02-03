@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
@@ -17,6 +15,8 @@ using AuthenticationService.Managers;
 using System.Security.Claims;
 using System.Web.Http.Cors;
 using CarlistApi.Utils;
+using WebPush;
+using Newtonsoft.Json;
 
 namespace CarlistApi.Controllers
 {
@@ -205,6 +205,42 @@ namespace CarlistApi.Controllers
             }
         }
 
+        [HttpPost]
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
+        [Route("api/useraccounts/test-push-next")]
+        [ResponseType(typeof(UserAccounts))]
+        public IHttpActionResult testPusdddh([FromBody]Subscription subscription)
+        {
+            var webPushClient = new WebPushClient();
+            try
+            {
+
+                var pushSubscription = new PushSubscription(
+                    "https://fcm.googleapis.com/fcm/send/cwMpSClYJ-g:APA91bGHMkUqztHG2AtSNW-aGSWgWIaUsjbRwy2dPVmOPBTwhidvnEqUJdcJaH5T7Ud4dozWkBncyBzFsrGG7t7-z5-u90UgEZ7qJCpefr048h7NeLuSy6RQXqiP7KVBAwsqHPV178Dm",
+                    "BIDddyYtaVpA2FwTa - edvrtbRIm8ZeMmhZ3t7qkGGLWpqfcybhxnisKK99uc2QvQSC4wX6f3pgiFKtuNaeq1k10",
+                    "l18IyjqdkI0DVI9dUkyYKQ"
+                );
+
+
+                var vapidDetails = new VapidDetails(
+                    "mailto:urielcookies@outlook.com",
+                    "BGtbGS02vyTs8DEeNMU-qkk06y8G_hftexcb9ckqBd8F4bolTd7E5FKhcM7JSOqL-TiVOP-lmxXLB5MjnQDEVeA",
+                    "qyNJkPc4vmlVRnkX3Mh5rbagxtyQzdsAzyllnqG46X0"
+                );
+
+                //var payloadzzz = new { title = "WAT UP" };
+                //var payloadx = new JavaScriptSerializer().Serialize(payloadzzz);
+
+                webPushClient.SendNotification(pushSubscription, "", vapidDetails);
+            }
+            catch (WebPushException exception)
+            {
+                Console.WriteLine("Http STATUS code" + exception.StatusCode);
+            }
+
+            return Ok("Greetings Humans");
+        }
+
         // POST: api/UserAccounts
         [ResponseType(typeof(UserAccounts))]
         public IHttpActionResult PostUserAccounts(UserAccounts userAccounts)
@@ -286,6 +322,18 @@ namespace CarlistApi.Controllers
             public String Username { get; set; }
             public String Email { get; set; }
             public DateTime CreatedTime { get; set; }
+        }
+
+        public class Subscription
+        {
+            public string endpoint { get; set; }
+            public SubscriptionKeys keys { get; set; }
+        }
+
+        public class SubscriptionKeys
+        {
+            public string p256dh { get; set; }
+            public string auth { get; set; }
         }
     }
 }

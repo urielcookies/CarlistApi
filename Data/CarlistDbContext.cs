@@ -14,5 +14,6 @@ namespace CarlistApi.data
         public DbSet<CarStatus> CarStatus { get; set; }
         public DbSet<CarAccess> CarAccess { get; set; }
         public DbSet<UserAccounts> UserAccounts { get; set; }
+        public DbSet<WebSubscriptions> WebSubscriptions { get; set; }
     }
 }
