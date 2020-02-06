@@ -13,6 +13,8 @@ using CarlistApi.data;
 using CarlistApi.Utils;
 using System.Web.Http.Cors;
 using WebPush;
+using System.Web;
+using System.Web.Script.Serialization;
 
 namespace CarlistApi.Controllers
 {
@@ -75,7 +77,10 @@ namespace CarlistApi.Controllers
         }
 
         // PUT: api/CarExpenses/5
-        [ResponseType(typeof(void))]
+        [HttpPut]
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
+        [Route("api/carexpenses/{id}")]
+        [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult PutCarExpenses(int id, CarExpenses carExpenses)
         {
             var utils = new Helper();
@@ -92,22 +97,28 @@ namespace CarlistApi.Controllers
                 }
 
                 var currentUser = utils.currentUser(db);
+                var entity = db.CarExpenses.FirstOrDefault(ci => ci.Id == id);
 
                 // is owner
                 var hasAccess = db.CarInformation
-                    .Any(c => c.Id == carExpenses.CarInformationId && c.UserAccountId == currentUser.Id);
+                    .Any(c => c.Id == entity.CarInformationId && c.UserAccountId == currentUser.Id);
 
                 // has permissions
                 if (!hasAccess)
                 {
                     hasAccess = db.CarAccess
-                        .Any(c => c.CarInformationId == carExpenses.CarInformationId && c.UserAccountId == currentUser.Id);
+                        .Any(c => c.CarInformationId == entity.CarInformationId && c.UserAccountId == currentUser.Id);
                 }
-
 
                 if (hasAccess)
                 {
-                    db.Entry(carExpenses).State = EntityState.Modified;
+                    // var entity = db.CarExpenses.FirstOrDefault(ci => ci.Id == id);
+
+                    entity.Expense = carExpenses.Expense;
+                    entity.Cost = carExpenses.Cost;
+
+                    // Throws at errors - need to look into it more (maybe just bring all clas sprops from client and nor modify them like here above)
+                    // db.Entry(carExpenses).State = EntityState.Modified;
 
                     try
                     {
@@ -126,6 +137,10 @@ namespace CarlistApi.Controllers
                     }
                     return StatusCode(HttpStatusCode.NoContent);
                 }
+                else
+                {
+                    return BadRequest("You have no access to this car or the car does not exist");
+                }
             }
             {
                 return BadRequest("Bad token");
@@ -139,7 +154,6 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult PostCarExpenses(CarExpenses carExpenses)
         {
-
             var utils = new Helper();
             if (utils.isAuthorized(db))
             {
@@ -148,6 +162,9 @@ namespace CarlistApi.Controllers
                 // is owner
                 var hasAccess = db.CarInformation
                     .Any(c => c.Id == carExpenses.CarInformationId && c.UserAccountId == currentUser.Id);
+                var url = !hasAccess
+                    ? $"home/mycarlist/{currentUser.Id}/{carExpenses.CarInformationId}/expenses"
+                    : $"home/carlist/{currentUser.Id}/{carExpenses.CarInformationId}/expenses";
 
                 // has permissions
                 if (!hasAccess)
@@ -167,26 +184,33 @@ namespace CarlistApi.Controllers
                         CreatedTime = DateTime.UtcNow,
                     };
 
-                    //var ownerAndAccessors = OwnerAndAccessors(currentUser.Id, carExpenses.CarInformationId, db);
-                    //var currentCar = db.CarInformation.FirstOrDefault(c => c.Id == newExpense.CarInformationId);
-                    //foreach (int userId in ownerAndAccessors)
-                    //{
-                    //    var userSubscription = db.WebSubscriptions.FirstOrDefault(user => user.UserAccountId == userId);
-                    //    if (userSubscription != null)
-                    //    {
-                    //        var subscription = new SubscriptionKeys
-                    //        {
-                    //            Endpoint = userSubscription.Endpoint,
-                    //            P256dh = userSubscription.P256dh,
-                    //            Auth = userSubscription.Auth,
-                    //            Subject = "mailto:urielcookies@outlook.com",
-                    //            PublicKey = "BGtbGS02vyTs8DEeNMU-qkk06y8G_hftexcb9ckqBd8F4bolTd7E5FKhcM7JSOqL-TiVOP-lmxXLB5MjnQDEVeA",
-                    //            PrivateKey = "qyNJkPc4vmlVRnkX3Mh5rbagxtyQzdsAzyllnqG46X0",
-                    //            PayLoad = $"{currentUser.Username} added {newExpense.Expense} of ${newExpense.Cost} to {currentCar.Year} {currentCar.Brand} {currentCar.Model}"
-                    //    };
-                    //        SendNotification(subscription);
-                    //    }
-                    //}
+                    var ownerAndAccessors = OwnerAndAccessors(currentUser.Id, carExpenses.CarInformationId, db);
+                    var currentCar = db.CarInformation.FirstOrDefault(c => c.Id == newExpense.CarInformationId);
+                    var notificationData = new { 
+                        title = "New Expense Created",
+                        body = $"{currentUser.Username} added {newExpense.Expense} of ${newExpense.Cost} to {currentCar.Year} {currentCar.Brand} {currentCar.Model}",
+                        url = url
+                    };
+                    var json = new JavaScriptSerializer().Serialize(notificationData);
+
+                    foreach (int userId in ownerAndAccessors)
+                    {
+                        var userSubscription = db.WebSubscriptions.FirstOrDefault(user => user.UserAccountId == userId);
+                        if (userSubscription != null)
+                        {
+                            var subscription = new SubscriptionKeys
+                            {
+                                Endpoint = userSubscription.Endpoint,
+                                P256dh = userSubscription.P256dh,
+                                Auth = userSubscription.Auth,
+                                Subject = "mailto:urielcookies@outlook.com",
+                                PublicKey = "BGtbGS02vyTs8DEeNMU-qkk06y8G_hftexcb9ckqBd8F4bolTd7E5FKhcM7JSOqL-TiVOP-lmxXLB5MjnQDEVeA",
+                                PrivateKey = "qyNJkPc4vmlVRnkX3Mh5rbagxtyQzdsAzyllnqG46X0",
+                                PayLoad = json
+                            };
+                            SendNotification(subscription);
+                        }
+                    }
 
                     db.CarExpenses.Add(newExpense);
                     db.SaveChanges();

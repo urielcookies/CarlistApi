@@ -48,18 +48,29 @@ namespace CarlistApi.Controllers
             if (utils.isAuthorized(db))
             {
                 var currentUser = utils.currentUser(db);
-                var newSubscription = new WebSubscriptions
+                var subscriptionEntity = db.WebSubscriptions.FirstOrDefault(c => c.UserAccountId == currentUser.Id);
+
+                if (subscriptionEntity != null)
                 {
-                    UserAccountId = currentUser.Id,
-                    Endpoint = subscription.endpoint,
-                    P256dh = subscription.keys.p256dh,
-                    Auth = subscription.keys.auth,
-                    CreatedTime = DateTime.UtcNow,
-                };
+                    subscriptionEntity.Endpoint = subscription.endpoint;
+                    subscriptionEntity.P256dh = subscription.keys.p256dh;
+                    subscriptionEntity.Auth = subscription.keys.auth;
 
-                db.WebSubscriptions.Add(newSubscription);
-                db.SaveChanges();
+                    db.SaveChanges();
+                } else
+                {
+                    var newSubscription = new WebSubscriptions
+                    {
+                        UserAccountId = currentUser.Id,
+                        Endpoint = subscription.endpoint,
+                        P256dh = subscription.keys.p256dh,
+                        Auth = subscription.keys.auth,
+                        CreatedTime = DateTime.UtcNow,
+                    };
 
+                    db.WebSubscriptions.Add(newSubscription);
+                    db.SaveChanges();
+                }
                 return Ok(HttpStatusCode.Created);
             }
             else
