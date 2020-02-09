@@ -38,6 +38,39 @@ namespace CarlistApi.Controllers
             return Ok(webSubscriptions);
         }
 
+        // Post: api/WebSubscriptions/5
+        [HttpPost]
+        [Route("api/websubscriptions/check-subscription")]
+        [ResponseType(typeof(WebSubscriptions))]
+        public IHttpActionResult CheckSubscription(Subscription subscription)
+        {
+            var utils = new Helper();
+            if (utils.isAuthorized(db))
+            {
+                var currentUser = utils.currentUser(db);
+                var webSubscription = db.WebSubscriptions.FirstOrDefault(w => w.UserAccountId == currentUser.Id);
+
+                if (webSubscription == null)
+                {
+                    return NotFound();
+                }
+
+                if (webSubscription.Endpoint == subscription.endpoint)
+                {
+                    return Ok(true);
+                }
+                else
+                {
+                    return Ok(false);
+                }
+
+            }
+            {
+                return BadRequest("Bad token");
+            }
+        }
+
+
         [HttpPost]
         [EnableCors(origins: "*", headers: "*", methods: "*")]
         [Route("api/websubscriptions/insert-subscription")]
