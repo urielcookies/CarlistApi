@@ -24,10 +24,9 @@ namespace CarlistApi.Controllers
         [EnableCors(origins: "*", headers: "*", methods: "*")]
         public IHttpActionResult Get()
         {
-            var utils = new Helper();
-            if (utils.isAuthorized(carlistDbContext))
+            if (Helper.isAuthorized())
             {
-                var currentUser = utils.currentUser(carlistDbContext);
+                var currentUser = Helper.currentUser();
                 var usersCars = carlistDbContext.CarInformation
                                 .Where(m => currentUser.Id == m.UserAccountId);
 
@@ -43,10 +42,9 @@ namespace CarlistApi.Controllers
         [Route("api/carinformation/access-other-cars")]
         public IHttpActionResult GetAccessCars()
         {
-            var utils = new Helper();
-            if (utils.isAuthorized(carlistDbContext))
+            if (Helper.isAuthorized())
             {
-                var currentUser = utils.currentUser(carlistDbContext);
+                var currentUser = Helper.currentUser();
                 var queryCarIds = carlistDbContext.CarAccess
                    .Where(s => s.UserAccountId == currentUser.Id)
                    .Select(x => x.CarInformationId); ;
@@ -69,10 +67,9 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult GetUsersCars(int userId)
         {
-            var utils = new Helper();
-            if (utils.isAuthorized(carlistDbContext))
+            if (Helper.isAuthorized())
             {
-                var currentUser = utils.currentUser(carlistDbContext);
+                var currentUser = Helper.currentUser();
 
                 var queryCarIds = carlistDbContext.CarInformation
                     .Where(s => s.UserAccountId == userId)
@@ -100,10 +97,9 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult GetOtherCarInfo(int carId)
         {
-            var utils = new Helper();
-            if (utils.isAuthorized(carlistDbContext))
+            if (Helper.isAuthorized())
             {
-                var currentUser = utils.currentUser(carlistDbContext);
+                var currentUser = Helper.currentUser();
 
                 var queryCarIds = carlistDbContext.CarAccess
                     .Where(s => s.UserAccountId == currentUser.Id)
@@ -127,8 +123,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult GetCarInfo(int carId)
         {
-            var utils = new Helper();
-            if (utils.isAuthorized(carlistDbContext))
+            if (Helper.isAuthorized())
             {
                 var carInfo = carlistDbContext.CarInformation.FirstOrDefault(m => m.Id == carId);
 

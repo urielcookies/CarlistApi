@@ -32,10 +32,9 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult GetUsersNames()
         {
-            var utils = new Helper();
-            if (utils.isAuthorized(db))
+            if (Helper.isAuthorized())
             {
-                var currentUser = utils.currentUser(db);
+                var currentUser = Helper.currentUser();
                 var queryCarIds = db.CarAccess
                    .Where(s => s.UserAccountId == currentUser.Id)
                    .Select(x => x.CarInformationId);

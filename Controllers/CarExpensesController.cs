@@ -33,10 +33,9 @@ namespace CarlistApi.Controllers
         [Route("api/carexpenses/{carInformationId}")]
         public IHttpActionResult GetSingleCarExpenses(int carInformationId)
         {
-            var utils = new Helper();
-            if (utils.isAuthorized(db))
+            if (Helper.isAuthorized())
             {
-                var currentUser = utils.currentUser(db);
+                var currentUser = Helper.currentUser();
 
                 var hasAccess = db.CarInformation
                     .Any(c => c.Id == carInformationId && c.UserAccountId == currentUser.Id);
@@ -83,8 +82,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult PutCarExpenses(int id, CarExpenses carExpenses)
         {
-            var utils = new Helper();
-            if (utils.isAuthorized(db))
+            if (Helper.isAuthorized())
             {
                 if (!ModelState.IsValid)
                 {
@@ -96,7 +94,7 @@ namespace CarlistApi.Controllers
                     return BadRequest();
                 }
 
-                var currentUser = utils.currentUser(db);
+                var currentUser = Helper.currentUser();
                 var entity = db.CarExpenses.FirstOrDefault(ci => ci.Id == id);
 
                 // is owner
@@ -154,10 +152,9 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult PostCarExpenses(CarExpenses carExpenses)
         {
-            var utils = new Helper();
-            if (utils.isAuthorized(db))
+            if (Helper.isAuthorized())
             {
-                var currentUser = utils.currentUser(db);
+                var currentUser = Helper.currentUser();
 
                 // is owner
                 var hasAccess = db.CarInformation
@@ -196,7 +193,7 @@ namespace CarlistApi.Controllers
                     foreach (int userId in ownerAndAccessors)
                     {
                         var userSubscription = db.WebSubscriptions.FirstOrDefault(user => user.UserAccountId == userId);
-                        if (userSubscription != null)
+                        if (userSubscription != null && userSubscription.UserAccountId != currentUser.Id)
                         {
                             var subscription = new SubscriptionKeys
                             {
@@ -234,10 +231,9 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult DeleteCarExpenses(int id)
         {
-            var utils = new Helper();
-            if (utils.isAuthorized(db))
+            if (Helper.isAuthorized())
             {
-                var currentUser = utils.currentUser(db);
+                var currentUser = Helper.currentUser();
                 var carInformationId = db.CarExpenses.FirstOrDefault(c => c.Id == id).CarInformationId;
 
                 // is owner

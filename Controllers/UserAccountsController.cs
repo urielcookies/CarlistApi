@@ -155,10 +155,9 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(UserAccounts))]
         public IHttpActionResult ChangePassword([FromBody]UserInfo passwords)
         {
-            var utils = new Helper();
-            if (utils.isAuthorized(db))
+            if (Helper.isAuthorized())
             {
-                var currentUser = utils.currentUser(db);
+                var currentUser = Helper.currentUser();
                 var currentPassword = passwords.currentPassword;
                 var newPassword = passwords.newPassword;
 
@@ -180,16 +179,77 @@ namespace CarlistApi.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("api/useraccounts/change-email")]
+        [ResponseType(typeof(UserAccounts))]
+        public IHttpActionResult ChangeEmail([FromBody]UserAccounts userAccounts)
+        {
+            if (Helper.isAuthorized())
+            {
+                if (userAccounts.Email == null)
+                {
+                    return BadRequest("There is no email");
+                }
+                var currentUser = Helper.currentUser();
+                var emailExist = db.UserAccounts.Any(user => user.Email == userAccounts.Email);
+                
+                if (emailExist)
+                {
+                    return BadRequest("Email Exists");
+                }
+                else
+                {
+                    currentUser.Email = userAccounts.Email;
+                    db.SaveChanges();
+                    return Ok(HttpStatusCode.OK);
+                }
+            }
+            else
+            {
+                return BadRequest("Bad token");
+            }
+        }
+
+        [HttpPut]
+        [Route("api/useraccounts/change-username")]
+        [ResponseType(typeof(UserAccounts))]
+        public IHttpActionResult ChangeUsername([FromBody]UserAccounts userAccounts)
+        {
+            if (Helper.isAuthorized())
+            {
+                if (userAccounts.Username == null)
+                {
+                    return BadRequest("There is no Username");
+                }
+                var currentUser = Helper.currentUser();
+                var usernameExist = db.UserAccounts.Any(user => user.Username == userAccounts.Username);
+
+                if (usernameExist)
+                {
+                    return BadRequest("Username Exists");
+                }
+                else
+                {
+                    currentUser.Username = userAccounts.Username;
+                    db.SaveChanges();
+                    return Ok(HttpStatusCode.OK);
+                }
+            }
+            else
+            {
+                return BadRequest("Bad token");
+            }
+        }
+
         [HttpGet]
         [EnableCors(origins: "*", headers: "*", methods: "*")]
         [Route("api/useraccounts/getuserinfo")]
         [ResponseType(typeof(UserAccounts))]
         public IHttpActionResult GetUserInfo()
         {
-            var utils = new Helper();
-            if (utils.isAuthorized(db))
+            if (Helper.isAuthorized())
             {
-                var currentUser = utils.currentUser(db);
+                var currentUser = Helper.currentUser();
                 var publicAccountInfo = new PublicAccountInfo
                 {
                     Id = currentUser.Id,
