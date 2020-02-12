@@ -19,22 +19,19 @@ namespace CarlistApi.Controllers
     public class CarInformationController : ApiController
     {
         CarlistDbContext carlistDbContext = new CarlistDbContext();
+
         // check token and check for email match in database to allow access
         // GET: api/CarInformation/
-        [EnableCors(origins: "*", headers: "*", methods: "*")]
         public IHttpActionResult Get()
         {
-            if (Helper.isAuthorized())
-            {
-                var currentUser = Helper.currentUser();
-                var usersCars = carlistDbContext.CarInformation
-                                .Where(m => currentUser.Id == m.UserAccountId);
-
-                return Ok(usersCars);
-            } else
-            {
+            if (!Helper.isAuthorized())
                 return BadRequest("Bad token");
-            }
+
+            var currentUser = Helper.currentUser();
+            var usersCars = carlistDbContext.CarInformation
+                .Where(m => currentUser.Id == m.UserAccountId);
+            
+            return Ok(usersCars);
         }
 
         // GET: api/CarInformation/
@@ -42,97 +39,79 @@ namespace CarlistApi.Controllers
         [Route("api/carinformation/access-other-cars")]
         public IHttpActionResult GetAccessCars()
         {
-            if (Helper.isAuthorized())
-            {
-                var currentUser = Helper.currentUser();
-                var queryCarIds = carlistDbContext.CarAccess
-                   .Where(s => s.UserAccountId == currentUser.Id)
-                   .Select(x => x.CarInformationId); ;
+            if (!Helper.isAuthorized())
+                return BadRequest("Bad token");
 
-                var permittedCars = carlistDbContext.CarInformation
+            var currentUser = Helper.currentUser();
+            var queryCarIds = carlistDbContext.CarAccess
+                .Where(s => s.UserAccountId == currentUser.Id)
+                .Select(x => x.CarInformationId); ;
+
+            var permittedCars = carlistDbContext.CarInformation
                     .Where(m => queryCarIds.Contains(m.Id));
 
-                return Ok(permittedCars);
-            }
-            else
-            {
-                return BadRequest("Bad token");
-            }
+            return Ok(permittedCars);
+
         }
 
         // GET: api/CarAccess
         [HttpGet]
-        [EnableCors(origins: "*", headers: "*", methods: "*")]
         [Route("api/carinformation/get-users-cars/{userId}")]
-        [ResponseType(typeof(CarExpenses))]
+        [ResponseType(typeof(CarInformation))]
         public IHttpActionResult GetUsersCars(int userId)
         {
-            if (Helper.isAuthorized())
-            {
-                var currentUser = Helper.currentUser();
-
-                var queryCarIds = carlistDbContext.CarInformation
-                    .Where(s => s.UserAccountId == userId)
-                    .Select(x => x.Id);
-
-                var permittedCarsIds = carlistDbContext.CarAccess
-                    .Where(m => m.UserAccountId == currentUser.Id && queryCarIds.Contains(m.CarInformationId))
-                    .Select(x => x.CarInformationId);
-
-                var permittedCars = carlistDbContext.CarInformation
-                    .Where(s => permittedCarsIds.Contains(s.Id));
-
-                return Ok(permittedCars);
-            }
-            else
-            {
+            if (!Helper.isAuthorized())
                 return BadRequest("Bad token");
-            }
+
+            var currentUser = Helper.currentUser();
+
+            var queryCarIds = carlistDbContext.CarInformation
+                .Where(s => s.UserAccountId == userId)
+                .Select(x => x.Id);
+
+            var permittedCarsIds = carlistDbContext.CarAccess
+                .Where(m => m.UserAccountId == currentUser.Id && queryCarIds.Contains(m.CarInformationId))
+                .Select(x => x.CarInformationId);
+
+            var permittedCars = carlistDbContext.CarInformation
+                .Where(s => permittedCarsIds.Contains(s.Id));
+
+            return Ok(permittedCars);
         }
 
         // GET: api/CarAccess
         [HttpGet]
-        [EnableCors(origins: "*", headers: "*", methods: "*")]
         [Route("api/carinformation/get-other-carinfo/{carId}")]
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult GetOtherCarInfo(int carId)
         {
-            if (Helper.isAuthorized())
-            {
-                var currentUser = Helper.currentUser();
-
-                var queryCarIds = carlistDbContext.CarAccess
-                    .Where(s => s.UserAccountId == currentUser.Id)
-                    .Select(x => x.CarInformationId);
-
-                var carInfo = carlistDbContext.CarInformation
-                    .FirstOrDefault(m => queryCarIds.Contains(m.Id) && m.Id == carId);
-
-                return Ok(carInfo);
-            }
-            else
-            {
+            if (!Helper.isAuthorized())
                 return BadRequest("Bad token");
-            }
+        
+            var currentUser = Helper.currentUser();
+
+            var queryCarIds = carlistDbContext.CarAccess
+                .Where(s => s.UserAccountId == currentUser.Id)
+                .Select(x => x.CarInformationId);
+
+            var carInfo = carlistDbContext.CarInformation
+                .FirstOrDefault(m => queryCarIds.Contains(m.Id) && m.Id == carId);
+
+            return Ok(carInfo);
         }
 
         // GET: api/CarAccess
         [HttpGet]
-        [EnableCors(origins: "*", headers: "*", methods: "*")]
         [Route("api/carinformation/get-carinfo/{carId}")]
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult GetCarInfo(int carId)
         {
-            if (Helper.isAuthorized())
-            {
-                var carInfo = carlistDbContext.CarInformation.FirstOrDefault(m => m.Id == carId);
-
-                return Ok(carInfo);
-            }
-            else
-            {
+            if (!Helper.isAuthorized())
                 return BadRequest("Bad token");
-            }
+
+            var carInfo = carlistDbContext.CarInformation.FirstOrDefault(m => m.Id == carId);
+
+            return Ok(carInfo);
         }
 
         // GET: api/CarInformation/5
@@ -157,11 +136,18 @@ namespace CarlistApi.Controllers
         // POST: api/CarInformation
         public IHttpActionResult Post([FromBody]CarInformation carInfo)
         {
+            if (!Helper.isAuthorized())
+                return BadRequest("Bad token");
+
             // Check for validation on db fields
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
+
+            var currentUser = Helper.currentUser();
+
+            carInfo.UserAccountId = currentUser.Id;
+            carInfo.CreatedTime = DateTime.UtcNow;
+
             carlistDbContext.CarInformation.Add(carInfo);
             carlistDbContext.SaveChanges();
             return StatusCode(HttpStatusCode.Created);
@@ -170,7 +156,11 @@ namespace CarlistApi.Controllers
         // PUT: api/CarInformation/5
         public IHttpActionResult Put(int id, [FromBody]CarInformation carInfo)
         {
+            if (!Helper.isAuthorized())
+                return BadRequest("Bad token");
+
             var entity = carlistDbContext.CarInformation.FirstOrDefault(ci => ci.Id == id);
+
             if (entity == null)
             {
                 return BadRequest("No record found on this id...");
@@ -182,7 +172,22 @@ namespace CarlistApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            entity.Partner = carInfo.Partner;
+            var currentUser = Helper.currentUser();
+
+            // is owner
+            var hasAccess = carlistDbContext.CarInformation
+                .Any(c => c.Id == entity.Id && c.UserAccountId == currentUser.Id);
+
+            // has permissions
+            if (!hasAccess)
+            {
+                hasAccess = carlistDbContext.CarAccess
+                    .Any(c => c.CarInformationId == entity.Id && c.UserAccountId == currentUser.Id && c.Write == true);
+            }
+
+            if (!hasAccess)
+                return BadRequest("No permission to edit");
+
             entity.Year = carInfo.Year;
             entity.Brand = carInfo.Brand;
             entity.Model = carInfo.Model;
@@ -191,7 +196,7 @@ namespace CarlistApi.Controllers
             entity.Notes = carInfo.Notes;
 
             carlistDbContext.SaveChanges();
-            return Ok("Record updated sucessfully...");
+            return Ok(HttpStatusCode.NoContent);
         }
 
         // DELETE: api/CarInformation/5
@@ -205,17 +210,6 @@ namespace CarlistApi.Controllers
             carlistDbContext.CarInformation.Remove(carInfo);
             carlistDbContext.SaveChanges();
             return Ok("Record deleted");
-        }
-
-        private static JWTContainerModel GetJWTContainerModel(string email)
-        {
-            return new JWTContainerModel()
-            {
-                Claims = new Claim[]
-                {
-                    new Claim(ClaimTypes.Email, email)
-                }
-            };
         }
     }
 }
