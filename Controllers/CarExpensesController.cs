@@ -33,7 +33,7 @@ namespace CarlistApi.Controllers
         [Route("api/carexpenses/{carInformationId}")]
         public IHttpActionResult GetSingleCarExpenses(int carInformationId)
         {
-            if (Helper.isAuthorized())
+            if (Helper.isAuthorizedJWT())
             {
                 var currentUser = Helper.currentUser();
 
@@ -82,7 +82,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult PutCarExpenses(int id, CarExpenses carExpenses)
         {
-            if (Helper.isAuthorized())
+            if (Helper.isAuthorizedJWT())
             {
                 if (!ModelState.IsValid)
                 {
@@ -152,7 +152,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult PostCarExpenses(CarExpenses carExpenses)
         {
-            if (Helper.isAuthorized())
+            if (Helper.isAuthorizedJWT())
             {
                 var currentUser = Helper.currentUser();
 
@@ -231,7 +231,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult DeleteCarExpenses(int id)
         {
-            if (Helper.isAuthorized())
+            if (Helper.isAuthorizedJWT())
             {
                 var currentUser = Helper.currentUser();
                 var carInformationId = db.CarExpenses.FirstOrDefault(c => c.Id == id).CarInformationId;

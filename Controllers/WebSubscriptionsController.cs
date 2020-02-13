@@ -44,7 +44,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(WebSubscriptions))]
         public IHttpActionResult CheckSubscription(Subscription subscription)
         {
-            if (Helper.isAuthorized())
+            if (Helper.isAuthorizedJWT())
             {
                 var currentUser = Helper.currentUser();
                 var webSubscription = db.WebSubscriptions.FirstOrDefault(w => w.UserAccountId == currentUser.Id);
@@ -76,7 +76,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(WebSubscriptions))]
         public IHttpActionResult InsertWebSubscription([FromBody]Subscription subscription)
         {
-            if (Helper.isAuthorized())
+            if (Helper.isAuthorizedJWT())
             {
                 var currentUser = Helper.currentUser();
                 var subscriptionEntity = db.WebSubscriptions.FirstOrDefault(c => c.UserAccountId == currentUser.Id);

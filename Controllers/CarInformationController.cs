@@ -24,7 +24,7 @@ namespace CarlistApi.Controllers
         // GET: api/CarInformation/
         public IHttpActionResult Get()
         {
-            if (!Helper.isAuthorized())
+            if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
 
             var currentUser = Helper.currentUser();
@@ -39,7 +39,7 @@ namespace CarlistApi.Controllers
         [Route("api/carinformation/access-other-cars")]
         public IHttpActionResult GetAccessCars()
         {
-            if (!Helper.isAuthorized())
+            if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
 
             var currentUser = Helper.currentUser();
@@ -60,7 +60,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarInformation))]
         public IHttpActionResult GetUsersCars(int userId)
         {
-            if (!Helper.isAuthorized())
+            if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
 
             var currentUser = Helper.currentUser();
@@ -85,7 +85,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult GetOtherCarInfo(int carId)
         {
-            if (!Helper.isAuthorized())
+            if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
         
             var currentUser = Helper.currentUser();
@@ -106,7 +106,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult GetCarInfo(int carId)
         {
-            if (!Helper.isAuthorized())
+            if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
 
             var carInfo = carlistDbContext.CarInformation.FirstOrDefault(m => m.Id == carId);
@@ -136,7 +136,7 @@ namespace CarlistApi.Controllers
         // POST: api/CarInformation
         public IHttpActionResult Post([FromBody]CarInformation carInfo)
         {
-            if (!Helper.isAuthorized())
+            if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
 
             // Check for validation on db fields
@@ -156,7 +156,7 @@ namespace CarlistApi.Controllers
         // PUT: api/CarInformation/5
         public IHttpActionResult Put(int id, [FromBody]CarInformation carInfo)
         {
-            if (!Helper.isAuthorized())
+            if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
 
             var entity = carlistDbContext.CarInformation.FirstOrDefault(ci => ci.Id == id);

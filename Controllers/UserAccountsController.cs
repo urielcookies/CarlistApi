@@ -155,7 +155,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(UserAccounts))]
         public IHttpActionResult ChangePassword([FromBody]UserInfo passwords)
         {
-            if (Helper.isAuthorized())
+            if (Helper.isAuthorizedJWT())
             {
                 var currentUser = Helper.currentUser();
                 var currentPassword = passwords.currentPassword;
@@ -184,7 +184,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(UserAccounts))]
         public IHttpActionResult ChangeEmail([FromBody]UserAccounts userAccounts)
         {
-            if (Helper.isAuthorized())
+            if (Helper.isAuthorizedJWT())
             {
                 if (userAccounts.Email == null)
                 {
@@ -215,7 +215,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(UserAccounts))]
         public IHttpActionResult ChangeUsername([FromBody]UserAccounts userAccounts)
         {
-            if (Helper.isAuthorized())
+            if (Helper.isAuthorizedJWT())
             {
                 if (userAccounts.Username == null)
                 {
@@ -247,7 +247,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(UserAccounts))]
         public IHttpActionResult GetUserInfo()
         {
-            if (Helper.isAuthorized())
+            if (Helper.isAuthorizedJWT())
             {
                 var currentUser = Helper.currentUser();
                 var publicAccountInfo = new PublicAccountInfo

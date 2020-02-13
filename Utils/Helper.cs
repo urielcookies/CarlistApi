@@ -14,7 +14,7 @@ namespace CarlistApi.Utils
     public class Helper
     {
         // private CarlistDbContext db = new CarlistDbContext();
-        public static bool isAuthorized()
+        public static bool isAuthorizedJWT()
         {
             // Not recieving cookies so trying to get JWT through headers
             // var tokenCookie = HttpContext.Current.Request.Cookies["token"];

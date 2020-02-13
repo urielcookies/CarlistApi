@@ -32,7 +32,7 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarExpenses))]
         public IHttpActionResult GetUsersNames()
         {
-            if (Helper.isAuthorized())
+            if (Helper.isAuthorizedJWT())
             {
                 var currentUser = Helper.currentUser();
                 var queryCarIds = db.CarAccess
