@@ -3,7 +3,6 @@ using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using CarlistApi.Models;
@@ -13,10 +12,7 @@ using System.Web;
 using AuthenticationService.Models;
 using AuthenticationService.Managers;
 using System.Security.Claims;
-using System.Web.Http.Cors;
 using CarlistApi.Utils;
-using WebPush;
-using Newtonsoft.Json;
 
 namespace CarlistApi.Controllers
 {
@@ -117,7 +113,24 @@ namespace CarlistApi.Controllers
         }
 
         // POST: api/useraccounts/login
-        [EnableCors(origins: "*", headers: "*", methods: "*")]
+        [Route("api/useraccounts/testing-cookies")]
+        public IHttpActionResult TestCookies()
+        {
+            IAuthContainerModel model = GetJWTContainerModel("urielcookies");
+            IAuthService authService = new JWTService(model.SecretKey);
+            string jwtToken = authService.GenerateToken(model);
+
+            HttpCookie token = new HttpCookie("testToken");
+            token.HttpOnly = true;
+            token.Value = jwtToken;
+            token.SameSite = (SameSiteMode)(1);
+            token.Domain = Request.RequestUri.Host;
+            HttpContext.Current.Response.Cookies.Add(token);
+
+            return Ok();
+        }
+
+        // POST: api/useraccounts/login
         [Route("api/useraccounts/login")]
         public IHttpActionResult Login(UserAccounts userAccounts)
         {
@@ -150,7 +163,6 @@ namespace CarlistApi.Controllers
         }
 
         [HttpPut]
-        [EnableCors(origins: "*", headers: "*", methods: "*")]
         [Route("api/useraccounts/changePassword")]
         [ResponseType(typeof(UserAccounts))]
         public IHttpActionResult ChangePassword([FromBody]UserInfo passwords)
@@ -242,7 +254,6 @@ namespace CarlistApi.Controllers
         }
 
         [HttpGet]
-        [EnableCors(origins: "*", headers: "*", methods: "*")]
         [Route("api/useraccounts/getuserinfo")]
         [ResponseType(typeof(UserAccounts))]
         public IHttpActionResult GetUserInfo()
@@ -263,42 +274,6 @@ namespace CarlistApi.Controllers
             {
                 return BadRequest("Bad token");
             }
-        }
-
-        [HttpPost]
-        [EnableCors(origins: "*", headers: "*", methods: "*")]
-        [Route("api/useraccounts/test-push-next")]
-        [ResponseType(typeof(UserAccounts))]
-        public IHttpActionResult testPusdddh([FromBody]Subscription subscription)
-        {
-            var webPushClient = new WebPushClient();
-            try
-            {
-
-                var pushSubscription = new PushSubscription(
-                    "https://fcm.googleapis.com/fcm/send/cwMpSClYJ-g:APA91bGHMkUqztHG2AtSNW-aGSWgWIaUsjbRwy2dPVmOPBTwhidvnEqUJdcJaH5T7Ud4dozWkBncyBzFsrGG7t7-z5-u90UgEZ7qJCpefr048h7NeLuSy6RQXqiP7KVBAwsqHPV178Dm",
-                    "BIDddyYtaVpA2FwTa - edvrtbRIm8ZeMmhZ3t7qkGGLWpqfcybhxnisKK99uc2QvQSC4wX6f3pgiFKtuNaeq1k10",
-                    "l18IyjqdkI0DVI9dUkyYKQ"
-                );
-
-
-                var vapidDetails = new VapidDetails(
-                    "mailto:urielcookies@outlook.com",
-                    "BGtbGS02vyTs8DEeNMU-qkk06y8G_hftexcb9ckqBd8F4bolTd7E5FKhcM7JSOqL-TiVOP-lmxXLB5MjnQDEVeA",
-                    "qyNJkPc4vmlVRnkX3Mh5rbagxtyQzdsAzyllnqG46X0"
-                );
-
-                //var payloadzzz = new { title = "WAT UP" };
-                //var payloadx = new JavaScriptSerializer().Serialize(payloadzzz);
-
-                webPushClient.SendNotification(pushSubscription, "", vapidDetails);
-            }
-            catch (WebPushException exception)
-            {
-                Console.WriteLine("Http STATUS code" + exception.StatusCode);
-            }
-
-            return Ok("Greetings Humans");
         }
 
         // POST: api/UserAccounts
@@ -379,8 +354,8 @@ namespace CarlistApi.Controllers
         public class PublicAccountInfo
         {
             public int Id { get; set; }
-            public String Username { get; set; }
-            public String Email { get; set; }
+            public string Username { get; set; }
+            public string Email { get; set; }
             public DateTime CreatedTime { get; set; }
         }
 
