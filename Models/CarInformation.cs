@@ -18,7 +18,6 @@ namespace CarlistApi.Models
         public Nullable<bool> CleanTitle { get; set; }
         public string Notes { get; set; }
         public int UserAccountId { get; set; }
-        public string Partner { get; set; }
         public System.DateTime CreatedTime { get; set; }
     }
 }
