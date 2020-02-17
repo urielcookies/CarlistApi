@@ -57,6 +57,18 @@ namespace CarlistApi.Controllers
             }
         }
 
+        // POST: api/CarAccesses/giveaccess
+        [HttpPost]
+        [Route("api/caraccess/giveaccess")]
+        [ResponseType(typeof(CarAccess))]
+        public IHttpActionResult GiveCarAccess(int id)
+        {
+            if (!Helper.isAuthorizedJWT())
+                return BadRequest("Bad token");
+
+            return Ok("Check if owner then give permissions based on read/write");
+        }
+
         // GET: api/CarAccesses/5
         [ResponseType(typeof(CarAccess))]
         public IHttpActionResult GetCarAccess(int id)
