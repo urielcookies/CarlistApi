@@ -59,7 +59,7 @@ namespace CarlistApi.Controllers
 
         // POST: api/CarAccesses/giveaccess
         [HttpPost]
-        [Route("api/caraccess/giveaccess")]
+        [Route("api/caraccess/give-car-access")]
         [ResponseType(typeof(CarAccess))]
         public IHttpActionResult GiveCarAccess(int id)
         {

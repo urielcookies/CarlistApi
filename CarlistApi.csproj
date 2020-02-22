@@ -158,6 +158,7 @@
     <Compile Include="Controllers\CarAccessesController.cs" />
     <Compile Include="Controllers\CarExpensesController.cs" />
     <Compile Include="Controllers\CarInformationController.cs" />
+    <Compile Include="Controllers\CarImagesController.cs" />
     <Compile Include="Controllers\UserAccountsController.cs" />
     <Compile Include="Controllers\WebSubscriptionsController.cs" />
     <Compile Include="Data\CarlistDbContext.cs" />
