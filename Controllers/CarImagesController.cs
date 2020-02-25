@@ -21,6 +21,10 @@ namespace CarlistApi.Controllers
             if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
 
+            // Check if user has permission to access car
+            // CODE HERE
+            // end
+
             var carId = carid.ToString();
 
             var account = new CloudStorageAccount(new StorageCredentials("4ever", "6rjyBoPAy19Ou2Co7uM9Sd8MtmUZldeoTomD1mhzeFCsFMvgS+rmY4AlPQzCAh/XF2/yY0OJbfdNWdIp1hbq1w=="), true);
@@ -44,6 +48,10 @@ namespace CarlistApi.Controllers
             // Check if user has permission to access car
             // CODE HERE
             // end
+
+            // - Update if adding imgaes
+            // - update if making the main image
+
             var httpRequest = HttpContext.Current.Request;
 
             var areJpeg = true;
