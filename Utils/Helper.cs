@@ -67,6 +67,53 @@ namespace CarlistApi.Utils
             return user;
         }
 
+        public enum PermissionType
+        {
+            OWNER,
+            WRITE,
+            READ,
+            NONE
+        }
+
+        public static PermissionType UserHasCarPermission(int carInformationId)
+        {
+            var db = new CarlistDbContext();
+            var Helper = new Helper();
+            
+            var currentUser = Helper.currentUser();
+            var permission = PermissionType.NONE;
+
+            var hasAccess = db.CarInformation
+                .Any(c => c.Id == carInformationId && c.UserAccountId == currentUser.Id);
+
+            if (hasAccess)
+            {
+                permission = PermissionType.OWNER;
+            }
+
+            if (!hasAccess)
+            {
+                hasAccess = db.CarAccess
+                    .Any(c => c.CarInformationId == carInformationId && c.UserAccountId == currentUser.Id && c.Write == true);
+                if (hasAccess)
+                {
+                    permission = PermissionType.WRITE;
+                }
+
+                if (!hasAccess)
+                {
+                    hasAccess = db.CarAccess
+                        .Any(c => c.CarInformationId == carInformationId && c.UserAccountId == currentUser.Id && c.Write == false);
+                    if (hasAccess)
+                    {
+                        permission = PermissionType.READ;
+                    }
+                }
+            }
+
+            return permission;
+        }
+
         private static JWTContainerModel GetJWTContainerModel(string email)
         {
             return new JWTContainerModel()

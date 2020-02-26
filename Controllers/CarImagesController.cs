@@ -1,4 +1,5 @@
-﻿using CarlistApi.Utils;
+﻿using CarlistApi.data;
+using CarlistApi.Utils;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
@@ -14,6 +15,8 @@ namespace CarlistApi.Controllers
 {
     public class CarImagesController : ApiController
     {
+        private CarlistDbContext db = new CarlistDbContext();
+
         [HttpGet]
         [Route("api/carimages/{carid}")]
         public IHttpActionResult GetCarImages(int carid)
@@ -21,9 +24,13 @@ namespace CarlistApi.Controllers
             if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
 
-            // Check if user has permission to access car
-            // CODE HERE
-            // end
+            var carEntity = db.CarInformation.Any(ci => ci.Id == carid);
+            if (!carEntity)
+                return BadRequest("Car does not exit");
+
+            var userHasCarPermission = Helper.UserHasCarPermission(carid);
+            if (userHasCarPermission == Helper.PermissionType.NONE)
+                return BadRequest("User has no access");
 
             var carId = carid.ToString();
 
@@ -45,12 +52,16 @@ namespace CarlistApi.Controllers
             if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
 
-            // Check if user has permission to access car
-            // CODE HERE
-            // end
+            var carEntity = db.CarInformation.Any(ci => ci.Id == carid);
+            if (!carEntity)
+                return BadRequest("Car does not exit");
 
-            // - Update if adding imgaes
-            // - update if making the main image
+            var userHasCarPermission = Helper.UserHasCarPermission(carid);
+            if (userHasCarPermission == Helper.PermissionType.NONE)
+                return BadRequest("User has no access");
+
+            if (userHasCarPermission == Helper.PermissionType.READ)
+                return BadRequest("User has no permission to post image");
 
             var httpRequest = HttpContext.Current.Request;
 
@@ -84,7 +95,26 @@ namespace CarlistApi.Controllers
             var container = blobClient.GetContainerReference("cars");
 
             var carId = carid.ToString();
+
+            // Check last index
+            var blobList = container.ListBlobs(prefix: carId, useFlatBlobListing: true);
+
+            string[] carImages = blobList.Select(
+                element => Convert.ToString(element.Uri).Replace($"https://4ever.blob.core.windows.net/cars/{carId}/", "")
+                ).ToArray();
+
+
             var counter = 0;
+            foreach (var carImage in carImages)
+            {
+                counter = int.Parse(carImage.Replace(".jpg", ""));
+            }
+
+            if (counter != 0)
+            {
+                counter++;
+            }
+
             foreach (string file in httpRequest.Files)
             {
                 var postedFile = httpRequest.Files[file];
@@ -95,7 +125,7 @@ namespace CarlistApi.Controllers
                 counter++;
             }
 
-            return Ok(carId);
+            return Ok(counter);
         }
     }
 }
