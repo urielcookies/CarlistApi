@@ -18,7 +18,7 @@ namespace CarlistApi.Controllers
         private CarlistDbContext db = new CarlistDbContext();
 
         [HttpGet]
-        [Route("api/carimages/{carid}")]
+        [Route("api/carimages/getcars/{carid}")]
         public IHttpActionResult GetCarImages(int carid)
         {
             if (!Helper.isAuthorizedJWT())
@@ -40,13 +40,13 @@ namespace CarlistApi.Controllers
             var container = blobClient.GetContainerReference("cars");
             var blobList = container.ListBlobs(prefix: carId, useFlatBlobListing: true);
 
-            String[] carImages = blobList.Select(element => Convert.ToString(element.Uri)).ToArray();
+            string[] carImages = blobList.Select(element => Convert.ToString(element.Uri)).ToArray();
 
             return Ok(carImages);
         }
 
         [HttpPost]
-        [Route("api/carimages/{carid}")]
+        [Route("api/carimages/postcar/{carid}")]
         public async System.Threading.Tasks.Task<IHttpActionResult> PostCarImagesAsync(int carid)
         {
             if (!Helper.isAuthorizedJWT())
@@ -125,7 +125,40 @@ namespace CarlistApi.Controllers
                 counter++;
             }
 
-            return Ok(counter);
+            return Ok(HttpStatusCode.NoContent);
+        }
+
+        // MAKE MAIN IMAGE AND RENAME OLD IMAGE
+
+        [HttpPost]
+        [Route("api/carimages/make-main-image")]
+        public IHttpActionResult MakeMainImage([FromBody]Image image)
+        {
+            var imageLink = image.ImageLink;
+
+            var carid = 1;
+            if (!Helper.isAuthorizedJWT())
+                return BadRequest("Bad token");
+
+            var carEntity = db.CarInformation.Any(ci => ci.Id == carid);
+            if (!carEntity)
+                return BadRequest("Car does not exit");
+
+            var userHasCarPermission = Helper.UserHasCarPermission(carid);
+            if (userHasCarPermission == Helper.PermissionType.NONE)
+                return BadRequest("User has no access");
+
+            if (userHasCarPermission == Helper.PermissionType.READ)
+                return BadRequest("User has no permission to post image");
+
+            // https://stackoverflow.com/questions/3734672/azure-storage-blob-rename?noredirect=1
+
+            return Ok("SUP");
+        }
+
+        public class Image
+        {
+            public string ImageLink { get; set; }
         }
     }
 }
