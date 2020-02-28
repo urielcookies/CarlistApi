@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 
@@ -128,15 +129,16 @@ namespace CarlistApi.Controllers
             return Ok(HttpStatusCode.NoContent);
         }
 
-        // MAKE MAIN IMAGE AND RENAME OLD IMAGE
-
         [HttpPost]
         [Route("api/carimages/make-main-image")]
-        public IHttpActionResult MakeMainImage([FromBody]Image image)
+        public async Task<IHttpActionResult> MakeMainImageAsync([FromBody]Image image)
         {
-            var imageLink = image.ImageLink;
+            var imageLink = image.ImageLink.Replace("https://4ever.blob.core.windows.net/cars/", "").Split('/');
 
-            var carid = 1;
+            var carid = Convert.ToInt32(imageLink[0]);
+            // var imageName = imageLink[1].Replace(".jpg", "");
+            var oldName = imageLink[1];
+
             if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
 
@@ -151,9 +153,62 @@ namespace CarlistApi.Controllers
             if (userHasCarPermission == Helper.PermissionType.READ)
                 return BadRequest("User has no permission to post image");
 
-            // https://stackoverflow.com/questions/3734672/azure-storage-blob-rename?noredirect=1
+            var account = new CloudStorageAccount(new StorageCredentials("4ever", "6rjyBoPAy19Ou2Co7uM9Sd8MtmUZldeoTomD1mhzeFCsFMvgS+rmY4AlPQzCAh/XF2/yY0OJbfdNWdIp1hbq1w=="), true);
+            var blobClient = account.CreateCloudBlobClient();
 
-            return Ok("SUP");
+            var container = blobClient.GetContainerReference("cars");
+
+            var carId = carid.ToString();
+            var blobList = container.ListBlobs(prefix: carId, useFlatBlobListing: true);
+
+            string[] carImages = blobList
+                .Select(
+                    element => Convert.ToString(element.Uri).Replace($"https://4ever.blob.core.windows.net/cars/{carId}/", "")
+                ).ToArray();
+
+
+            var lastImageName = 0;
+            foreach (var carImage in carImages)
+            {
+                lastImageName = int.Parse(carImage.Replace(".jpg", ""));
+            }
+            lastImageName++;
+
+            //grab the blob
+            //CloudBlob existBlob = container.GetBlobReference("myBlobName");
+            //CloudBlob newBlob = container.GetBlobReference("myNewBlobName");
+            ////create a new blob
+            //newBlob.CopyFromBlob(existBlob);
+            ////delete the old
+            //existBlob.Delete();
+
+            // await RenameAsync(container, "0.jpg", $"{lastImageName.ToString()}.jpg");
+            // await RenameAsync(container, oldName, "0.jpg");
+
+            return Ok(lastImageName);
+        }
+
+        private static void Rename(CloudBlobContainer container, string oldName, string newName)
+            {
+            //Warning: this Wait() is bad practice and can cause deadlock issues when used from ASP.NET applications
+            RenameAsync(container, oldName, newName); // .Wait();
+        }
+
+        private static async Task RenameAsync(CloudBlobContainer container, string oldName, string newName)
+        {
+            CloudBlockBlob source = (CloudBlockBlob)await container.GetBlobReferenceFromServerAsync(oldName);
+            CloudBlockBlob target = container.GetBlockBlobReference(newName);
+
+
+            await target.StartCopyAsync(source);
+
+            while (target.CopyState.Status == CopyStatus.Pending)
+                await Task.Delay(100);
+
+            if (target.CopyState.Status != CopyStatus.Success)
+                throw new Exception("Rename failed: " + target.CopyState.Status);
+
+            await source.DeleteAsync();
         }
 
         public class Image
