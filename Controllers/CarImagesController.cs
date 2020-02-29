@@ -136,7 +136,6 @@ namespace CarlistApi.Controllers
             var imageLink = image.ImageLink.Replace("https://4ever.blob.core.windows.net/cars/", "").Split('/');
 
             var carid = Convert.ToInt32(imageLink[0]);
-            // var imageName = imageLink[1].Replace(".jpg", "");
             var oldName = imageLink[1];
 
             if (!Helper.isAuthorizedJWT())
@@ -174,24 +173,44 @@ namespace CarlistApi.Controllers
             }
             lastImageName++;
 
-            //grab the blob
-            //CloudBlob existBlob = container.GetBlobReference("myBlobName");
-            //CloudBlob newBlob = container.GetBlobReference("myNewBlobName");
-            ////create a new blob
-            //newBlob.CopyFromBlob(existBlob);
-            ////delete the old
-            //existBlob.Delete();
+            await RenameAsync(container, $"{carId}/0.jpg", $"{carId}/{lastImageName.ToString()}.jpg");
+            await RenameAsync(container, $"{carId}/{oldName}", $"{carId}/0.jpg");
 
-            // await RenameAsync(container, "0.jpg", $"{lastImageName.ToString()}.jpg");
-            // await RenameAsync(container, oldName, "0.jpg");
-
-            return Ok(lastImageName);
+            return Ok(HttpStatusCode.OK);
         }
 
-        private static void Rename(CloudBlobContainer container, string oldName, string newName)
-            {
-            //Warning: this Wait() is bad practice and can cause deadlock issues when used from ASP.NET applications
-            RenameAsync(container, oldName, newName); // .Wait();
+        [HttpPost]
+        [Route("api/carimages/delete-car-image")]
+        public IHttpActionResult DeleteCarImage([FromBody]Image image)
+        {
+            var imageLink = image.ImageLink.Replace("https://4ever.blob.core.windows.net/cars/", "").Split('/');
+
+            var carid = Convert.ToInt32(imageLink[0]);
+            var oldName = imageLink[1];
+
+            if (!Helper.isAuthorizedJWT())
+                return BadRequest("Bad token");
+
+            var carEntity = db.CarInformation.Any(ci => ci.Id == carid);
+            if (!carEntity)
+                return BadRequest("Car does not exit");
+
+            var userHasCarPermission = Helper.UserHasCarPermission(carid);
+            if (userHasCarPermission == Helper.PermissionType.NONE)
+                return BadRequest("User has no access");
+
+            if (userHasCarPermission == Helper.PermissionType.READ)
+                return BadRequest("User has no permission to post image");
+
+            var account = new CloudStorageAccount(new StorageCredentials("4ever", "6rjyBoPAy19Ou2Co7uM9Sd8MtmUZldeoTomD1mhzeFCsFMvgS+rmY4AlPQzCAh/XF2/yY0OJbfdNWdIp1hbq1w=="), true);
+            var blobClient = account.CreateCloudBlobClient();
+
+            var container = blobClient.GetContainerReference("cars");
+            var carId = carid.ToString();
+
+            container.GetBlockBlobReference($"{carId}/{oldName}").DeleteIfExists();
+
+            return Ok(HttpStatusCode.Accepted);
         }
 
         private static async Task RenameAsync(CloudBlobContainer container, string oldName, string newName)
