@@ -104,7 +104,6 @@ namespace CarlistApi.Controllers
                 element => Convert.ToString(element.Uri).Replace($"https://4ever.blob.core.windows.net/cars/{carId}/", "")
                 ).ToArray();
 
-
             var counter = 0;
             foreach (var carImage in carImages)
             {
@@ -211,6 +210,43 @@ namespace CarlistApi.Controllers
             container.GetBlockBlobReference($"{carId}/{oldName}").DeleteIfExists();
 
             return Ok(HttpStatusCode.Accepted);
+        }
+
+        [HttpPost]
+        [Route("api/carimages/deletecar/{carid}")]
+        public IHttpActionResult DeleteCarImages(int carid)
+        {
+            if (!Helper.isAuthorizedJWT())
+                return BadRequest("Bad token");
+
+            var carEntity = db.CarInformation.Any(ci => ci.Id == carid);
+            if (!carEntity)
+                return BadRequest("Car does not exit");
+
+            var userHasCarPermission = Helper.UserHasCarPermission(carid);
+            if (userHasCarPermission == Helper.PermissionType.NONE)
+                return BadRequest("User has no access");
+
+            if (userHasCarPermission == Helper.PermissionType.READ)
+                return BadRequest("User has no permission to post image");
+
+            var account = new CloudStorageAccount(new StorageCredentials("4ever", "6rjyBoPAy19Ou2Co7uM9Sd8MtmUZldeoTomD1mhzeFCsFMvgS+rmY4AlPQzCAh/XF2/yY0OJbfdNWdIp1hbq1w=="), true);
+            var blobClient = account.CreateCloudBlobClient();
+
+            var container = blobClient.GetContainerReference("cars");
+
+            var carId = carid.ToString();
+            var blobList = container.ListBlobs(prefix: carId, useFlatBlobListing: true);
+
+            string[] carImages = blobList.Select(
+                element => Convert.ToString(element.Uri).Replace($"https://4ever.blob.core.windows.net/cars/", "")
+                ).ToArray();
+
+            foreach (var carImage in carImages)
+            {
+                container.GetBlockBlobReference(carImage).DeleteIfExists();
+            }
+            return Ok(HttpStatusCode.OK);
         }
 
         private static async Task RenameAsync(CloudBlobContainer container, string oldName, string newName)
