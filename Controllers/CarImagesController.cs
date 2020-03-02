@@ -97,7 +97,7 @@ namespace CarlistApi.Controllers
 
             var carId = carid.ToString();
 
-            // Check last index
+            // Check last index.
             var blobList = container.ListBlobs(prefix: carId, useFlatBlobListing: true);
 
             string[] carImages = blobList.Select(
