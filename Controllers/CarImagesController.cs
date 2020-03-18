@@ -39,7 +39,10 @@ namespace CarlistApi.Controllers
             var blobClient = account.CreateCloudBlobClient();
 
             var container = blobClient.GetContainerReference("cars");
-            var blobList = container.ListBlobs(prefix: carId, useFlatBlobListing: true);
+            var blobList = container
+                .ListBlobs(useFlatBlobListing: true)
+                .OfType<ICloudBlob>()
+                .Where(b => b.Name.StartsWith($"{carId}/"));
 
             string[] carImages = blobList.Select(element => Convert.ToString(element.Uri)).ToArray();
 
@@ -98,7 +101,10 @@ namespace CarlistApi.Controllers
             var carId = carid.ToString();
 
             // Check last index.
-            var blobList = container.ListBlobs(prefix: carId, useFlatBlobListing: true);
+            var blobList = container
+                .ListBlobs(useFlatBlobListing: true)
+                .OfType<ICloudBlob>()
+                .Where(b => b.Name.StartsWith($"{carId}/"));
 
             string[] carImages = blobList.Select(
                 element => Convert.ToString(element.Uri).Replace($"https://4ever.blob.core.windows.net/cars/{carId}/", "")
@@ -157,7 +163,10 @@ namespace CarlistApi.Controllers
             var container = blobClient.GetContainerReference("cars");
 
             var carId = carid.ToString();
-            var blobList = container.ListBlobs(prefix: carId, useFlatBlobListing: true);
+            var blobList = container
+                .ListBlobs(useFlatBlobListing: true)
+                .OfType<ICloudBlob>()
+                .Where(b => b.Name.StartsWith($"{carId}/"));
 
             string[] carImages = blobList
                 .Select(
@@ -236,7 +245,10 @@ namespace CarlistApi.Controllers
             var container = blobClient.GetContainerReference("cars");
 
             var carId = carid.ToString();
-            var blobList = container.ListBlobs(prefix: carId, useFlatBlobListing: true);
+            var blobList = container
+                .ListBlobs(useFlatBlobListing: true)
+                .OfType<ICloudBlob>()
+                .Where(b => b.Name.StartsWith($"{carId}/"));
 
             string[] carImages = blobList.Select(
                 element => Convert.ToString(element.Uri).Replace($"https://4ever.blob.core.windows.net/cars/", "")
