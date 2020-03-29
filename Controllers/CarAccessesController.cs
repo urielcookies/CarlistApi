@@ -82,6 +82,25 @@ namespace CarlistApi.Controllers
             return Ok(carAccess);
         }
 
+        [HttpGet]
+        [Route("api/caraccess/get-permissions/{carId}")]
+        [ResponseType(typeof(CarAccess))]
+        public IHttpActionResult FetchPermissions(int carid)
+        {
+            if (!Helper.isAuthorizedJWT())
+                return BadRequest("Bad token");
+
+            var carEntity = db.CarInformation.Any(ci => ci.Id == carid);
+            if (!carEntity)
+                return BadRequest("Car does not exit");
+
+            var userPermissionRank = Helper.UserHasCarPermission(carid);
+            var userHasPermissions = Helper.PermissionType.OWNER == userPermissionRank
+                || Helper.PermissionType.WRITE == userPermissionRank;
+
+            return Ok(userHasPermissions);
+        }
+
         // PUT: api/CarAccesses/5
         [ResponseType(typeof(void))]
         public IHttpActionResult PutCarAccess(int id, CarAccess carAccess)
