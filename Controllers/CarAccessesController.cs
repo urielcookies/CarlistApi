@@ -95,10 +95,10 @@ namespace CarlistApi.Controllers
                 return BadRequest("Car does not exit");
 
             var userPermissionRank = Helper.UserHasCarPermission(carid);
-            var userHasPermissions = Helper.PermissionType.OWNER == userPermissionRank
+            var userHasWritePermissions = Helper.PermissionType.OWNER == userPermissionRank
                 || Helper.PermissionType.WRITE == userPermissionRank;
 
-            return Ok(userHasPermissions);
+            return Ok(userHasWritePermissions);
         }
 
         // PUT: api/CarAccesses/5
