@@ -82,6 +82,7 @@ namespace CarlistApi.Controllers
             return Ok(carAccess);
         }
 
+        // GET: api/caraccess/get-permissions/5}
         [HttpGet]
         [Route("api/caraccess/get-permissions/{carId}")]
         [ResponseType(typeof(CarAccess))]
