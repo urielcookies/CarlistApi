@@ -250,6 +250,10 @@
     <Compile Include="Migrations\202002160614134_RemovePartners.designer.cs">
       <DependentUpon>202002160614134_RemovePartners.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202004070526493_MakeNullableValuesCarStatus.cs" />
+    <Compile Include="Migrations\202004070526493_MakeNullableValuesCarStatus.designer.cs">
+      <DependentUpon>202004070526493_MakeNullableValuesCarStatus.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\CarAccess.cs" />
     <Compile Include="Models\CarExpenses.cs" />
@@ -313,6 +317,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202002160614134_RemovePartners.resx">
       <DependentUpon>202002160614134_RemovePartners.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202004070526493_MakeNullableValuesCarStatus.resx">
+      <DependentUpon>202004070526493_MakeNullableValuesCarStatus.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

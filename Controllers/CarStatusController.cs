@@ -26,11 +26,13 @@ namespace CarlistApi.Controllers
             if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
 
-            var entity = db.CarStatus.FirstOrDefault(cs => cs.CarInformationId == carid);
-            if (entity == null)
+            var carEntity = db.CarInformation.Any(ci => ci.Id == carid);
+            if (!carEntity)
                 return BadRequest("Car does not exit");
 
-            return Ok(entity);
+            var carStatus = db.CarStatus.FirstOrDefault(cs => cs.CarInformationId == carid);
+
+            return Ok(carStatus);
         }
 
         // GET: api/CarStatus
@@ -91,12 +93,43 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarStatus))]
         public IHttpActionResult PostCarStatus(CarStatus carStatus)
         {
+            if (!Helper.isAuthorizedJWT())
+                return BadRequest("Bad token");
+
+            var userHasCarPermission = Helper.UserHasCarPermission(carStatus.CarInformationId);
+            if (userHasCarPermission == Helper.PermissionType.NONE)
+                return BadRequest("User has no access");
+
+            if (userHasCarPermission == Helper.PermissionType.READ)
+                return BadRequest("User has no permission to post image");
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.CarStatus.Add(carStatus);
+            var carStatusEntity = db.CarStatus.FirstOrDefault(cs => carStatus.CarInformationId == cs.CarInformationId);
+            carStatus.UserAccountId = Helper.currentUser().Id;
+            if (carStatusEntity == null)
+            {  
+                carStatus.CreatedTime = DateTime.UtcNow;
+                db.CarStatus.Add(carStatus);
+            }
+            else
+            {
+                carStatusEntity.Sold = carStatus.Sold;
+                if (carStatus.Sold == false)
+                {
+                    carStatusEntity.PriceSold = null;
+                    carStatusEntity.YearSold = null;
+                }
+                else
+                {
+                    carStatusEntity.PriceSold = carStatus.PriceSold;
+                    carStatusEntity.YearSold = carStatus.YearSold;
+                }
+            }
+
             db.SaveChanges();
 
             return CreatedAtRoute("DefaultApi", new { id = carStatus.Id }, carStatus);

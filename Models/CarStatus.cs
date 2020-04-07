@@ -14,8 +14,8 @@ namespace CarlistApi.Models
         public int CarInformationId { get; set; }
         public bool Sold { get; set; }
         [Column(TypeName = "Money")]
-        public decimal PriceSold { get; set; }
-        public short YearSold { get; set; }
+        public Nullable <decimal> PriceSold { get; set; }
+        public Nullable <short> YearSold { get; set; }
         public System.DateTime CreatedTime { get; set; }
     }
 }
