@@ -150,7 +150,7 @@ namespace CarlistApi.Controllers
 
             carlistDbContext.CarInformation.Add(carInfo);
             carlistDbContext.SaveChanges();
-            return StatusCode(HttpStatusCode.Created);
+            return Ok(carInfo.Id);
         }
 
         // PUT: api/CarInformation/5
