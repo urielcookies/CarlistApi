@@ -57,16 +57,32 @@ namespace CarlistApi.Controllers
             }
         }
 
-        // POST: api/CarAccesses/giveaccess
+        // POST: api/caraccess/give-car-access
         [HttpPost]
         [Route("api/caraccess/give-car-access")]
         [ResponseType(typeof(CarAccess))]
-        public IHttpActionResult GiveCarAccess(int id)
+        public IHttpActionResult GiveCarAccesses(GiveCarAccess giveCarAccess)
         {
             if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
 
-            return Ok("Check if owner then give permissions based on read/write");
+            var userHasCarPermission = Helper.UserHasCarPermission(giveCarAccess.CarInformationId);
+            if (userHasCarPermission != Helper.PermissionType.OWNER)
+                return BadRequest("User needs to be owner to give car access");
+
+            var userId = db.UserAccounts
+                .FirstOrDefault(ua => ua.Username.ToLower() == giveCarAccess.Username.ToLower()).Id;
+
+            var carAccess = new CarAccess();
+            carAccess.UserAccountId = userId;
+            carAccess.CarInformationId = giveCarAccess.CarInformationId;
+            carAccess.Write = giveCarAccess.Write;
+            carAccess.CreatedTime = DateTime.UtcNow;
+
+            db.CarAccess.Add(carAccess);
+            db.SaveChanges();
+
+            return Ok(carAccess);
         }
 
         // GET: api/CarAccesses/5
@@ -146,8 +162,8 @@ namespace CarlistApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            db.CarAccess.Add(carAccess);
-            db.SaveChanges();
+            // db.CarAccess.Add(carAccess);
+            // db.SaveChanges();
 
             return CreatedAtRoute("DefaultApi", new { id = carAccess.Id }, carAccess);
         }
@@ -180,6 +196,13 @@ namespace CarlistApi.Controllers
         private bool CarAccessExists(int id)
         {
             return db.CarAccess.Count(e => e.Id == id) > 0;
+        }
+
+        public class GiveCarAccess
+        {
+            public string Username { get; set; }
+            public int CarInformationId { get; set; }
+            public bool Write { get; set; }
         }
     }
 }

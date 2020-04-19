@@ -150,6 +150,9 @@ namespace CarlistApi.Controllers
 
             carlistDbContext.CarInformation.Add(carInfo);
             carlistDbContext.SaveChanges();
+
+            // make car status db entry here
+
             return Ok(carInfo.Id);
         }
 
@@ -207,8 +210,16 @@ namespace CarlistApi.Controllers
             {
                 return BadRequest("Record does not exist");
             }
-            carlistDbContext.CarInformation.Remove(carInfo);
-            carlistDbContext.SaveChanges();
+            // carlistDbContext.CarInformation.Remove(carInfo);
+            // carlistDbContext.SaveChanges();
+
+            // check if onwer before feleting
+            // delete car information
+            // delete all car expsenses
+            // delete all car access
+            // delete car status
+            // delete car images folder
+
             return Ok("Record deleted");
         }
     }

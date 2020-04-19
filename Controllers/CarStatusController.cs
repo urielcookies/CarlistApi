@@ -132,7 +132,7 @@ namespace CarlistApi.Controllers
 
             db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = carStatus.Id }, carStatus);
+            return CreatedAtRoute("DefaultApi", new { id = carStatus.Id }, carStatusEntity);
         }
 
         // DELETE: api/CarStatus/5
