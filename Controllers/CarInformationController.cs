@@ -13,6 +13,9 @@ using AuthenticationService.Models;
 using CarlistApi.data;
 using CarlistApi.Models;
 using CarlistApi.Utils;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Auth;
+using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace CarlistApi.Controllers
 {
@@ -205,22 +208,62 @@ namespace CarlistApi.Controllers
         // DELETE: api/CarInformation/5
         public IHttpActionResult Delete(int id)
         {
+            if (!Helper.isAuthorizedJWT())
+                return BadRequest("Bad token");
+
+            var userHasCarPermission = Helper.UserHasCarPermission(id);
+            if (userHasCarPermission != Helper.PermissionType.OWNER)
+                return BadRequest("User needs to be owner to give car access");
+
             var carInfo = carlistDbContext.CarInformation.Find(id);
             if (carInfo == null)
-            {
                 return BadRequest("Record does not exist");
+
+            // Delete All Car Expenses
+            IQueryable allCarExpenses = carlistDbContext.CarExpenses
+                .Where(s => s.CarInformationId == id);
+            foreach (CarExpenses carExpense in allCarExpenses)
+            {
+                carlistDbContext.CarExpenses.Remove(carExpense);
             }
-            // carlistDbContext.CarInformation.Remove(carInfo);
-            // carlistDbContext.SaveChanges();
 
-            // check if onwer before feleting
-            // delete car information
-            // delete all car expsenses
-            // delete all car access
-            // delete car status
-            // delete car images folder
+            // Delete All Car Access
+            IQueryable allCarAccess = carlistDbContext.CarAccess
+                .Where(s => s.CarInformationId == id);
+            foreach (CarAccess carAccess in allCarAccess)
+            {
+                carlistDbContext.CarAccess.Remove(carAccess);
+            }
 
-            return Ok("Record deleted");
+            // Delete Car Status
+            var carStatus = carlistDbContext.CarStatus
+                .FirstOrDefault(cs => cs.CarInformationId == id);
+            carlistDbContext.CarStatus.Remove(carStatus);
+
+            // Delete All Images
+            var account = new CloudStorageAccount(new StorageCredentials("4ever", "6rjyBoPAy19Ou2Co7uM9Sd8MtmUZldeoTomD1mhzeFCsFMvgS+rmY4AlPQzCAh/XF2/yY0OJbfdNWdIp1hbq1w=="), true);
+            var blobClient = account.CreateCloudBlobClient();
+
+            var container = blobClient.GetContainerReference("cars");
+
+            var carId = id.ToString();
+            var blobList = container
+                .ListBlobs(useFlatBlobListing: true)
+                .OfType<ICloudBlob>()
+                .Where(b => b.Name.StartsWith($"{carId}/"));
+
+            string[] carImages = blobList.Select(
+                element => Convert.ToString(element.Uri).Replace($"https://4ever.blob.core.windows.net/cars/", "")
+                ).ToArray();
+
+            foreach (var carImage in carImages)
+            {
+                container.GetBlockBlobReference(carImage).DeleteIfExists();
+            }
+
+            carlistDbContext.CarInformation.Remove(carInfo);
+            carlistDbContext.SaveChanges();
+            return Ok(HttpStatusCode.OK);
         }
     }
 }
