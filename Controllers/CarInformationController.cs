@@ -154,7 +154,14 @@ namespace CarlistApi.Controllers
             carlistDbContext.CarInformation.Add(carInfo);
             carlistDbContext.SaveChanges();
 
-            // make car status db entry here
+            var newCarStatus = new CarStatus();
+            newCarStatus.UserAccountId = currentUser.Id;
+            newCarStatus.CarInformationId = carInfo.Id;
+            newCarStatus.Sold = false;
+            newCarStatus.CreatedTime = DateTime.UtcNow;
+
+            carlistDbContext.CarStatus.Add(newCarStatus);
+            carlistDbContext.SaveChanges();
 
             return Ok(carInfo.Id);
         }

@@ -58,6 +58,16 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(void))]
         public IHttpActionResult PutCarStatus(int id, CarStatus carStatus)
         {
+            if (!Helper.isAuthorizedJWT())
+                return BadRequest("Bad token");
+
+            var userHasCarPermission = Helper.UserHasCarPermission(carStatus.CarInformationId);
+            if (userHasCarPermission == Helper.PermissionType.NONE)
+                return BadRequest("User has no access");
+
+            if (userHasCarPermission == Helper.PermissionType.READ)
+                return BadRequest("User has no permission to post image");
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -89,51 +99,51 @@ namespace CarlistApi.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/CarStatus
-        [ResponseType(typeof(CarStatus))]
-        public IHttpActionResult PostCarStatus(CarStatus carStatus)
-        {
-            if (!Helper.isAuthorizedJWT())
-                return BadRequest("Bad token");
+        //// POST: api/CarStatus
+        //[ResponseType(typeof(CarStatus))]
+        //public IHttpActionResult PostCarStatus(CarStatus carStatus)
+        //{
+        //    if (!Helper.isAuthorizedJWT())
+        //        return BadRequest("Bad token");
 
-            var userHasCarPermission = Helper.UserHasCarPermission(carStatus.CarInformationId);
-            if (userHasCarPermission == Helper.PermissionType.NONE)
-                return BadRequest("User has no access");
+        //    var userHasCarPermission = Helper.UserHasCarPermission(carStatus.CarInformationId);
+        //    if (userHasCarPermission == Helper.PermissionType.NONE)
+        //        return BadRequest("User has no access");
 
-            if (userHasCarPermission == Helper.PermissionType.READ)
-                return BadRequest("User has no permission to post image");
+        //    if (userHasCarPermission == Helper.PermissionType.READ)
+        //        return BadRequest("User has no permission to post image");
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            var carStatusEntity = db.CarStatus.FirstOrDefault(cs => carStatus.CarInformationId == cs.CarInformationId);
-            carStatus.UserAccountId = Helper.currentUser().Id;
-            if (carStatusEntity == null)
-            {  
-                carStatus.CreatedTime = DateTime.UtcNow;
-                db.CarStatus.Add(carStatus);
-            }
-            else
-            {
-                carStatusEntity.Sold = carStatus.Sold;
-                if (carStatus.Sold == false)
-                {
-                    carStatusEntity.PriceSold = null;
-                    carStatusEntity.YearSold = null;
-                }
-                else
-                {
-                    carStatusEntity.PriceSold = carStatus.PriceSold;
-                    carStatusEntity.YearSold = carStatus.YearSold;
-                }
-            }
+        //    var carStatusEntity = db.CarStatus.FirstOrDefault(cs => carStatus.CarInformationId == cs.CarInformationId);
+        //    carStatus.UserAccountId = Helper.currentUser().Id;
+        //    if (carStatusEntity == null)
+        //    {  
+        //        carStatus.CreatedTime = DateTime.UtcNow;
+        //        db.CarStatus.Add(carStatus);
+        //    }
+        //    else
+        //    {
+        //        carStatusEntity.Sold = carStatus.Sold;
+        //        if (carStatus.Sold == false)
+        //        {
+        //            carStatusEntity.PriceSold = null;
+        //            carStatusEntity.YearSold = null;
+        //        }
+        //        else
+        //        {
+        //            carStatusEntity.PriceSold = carStatus.PriceSold;
+        //            carStatusEntity.YearSold = carStatus.YearSold;
+        //        }
+        //    }
 
-            db.SaveChanges();
+        //    db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = carStatus.Id }, carStatusEntity);
-        }
+        //    return CreatedAtRoute("DefaultApi", new { id = carStatus.Id }, carStatusEntity);
+        //}
 
         // DELETE: api/CarStatus/5
         [ResponseType(typeof(CarStatus))]
