@@ -170,7 +170,7 @@ namespace CarlistApi.Controllers
 
         // DELETE: api/CarAccesses/5
         [ResponseType(typeof(CarAccess))]
-        public IHttpActionResult DeleteCarAccess(int id)
+        public IHttpActionResult DeleteCarAccess(int id) // replace caraccess with postobject of userId and carInfoId
         {
             CarAccess carAccess = db.CarAccess.Find(id);
             if (carAccess == null)
@@ -178,8 +178,15 @@ namespace CarlistApi.Controllers
                 return NotFound();
             }
 
+            if (!Helper.isAuthorizedJWT())
+                return BadRequest("Bad token");
+
+            var userHasCarPermission = Helper.UserHasCarPermission(carAccess.CarInformationId);
+            if (userHasCarPermission != Helper.PermissionType.OWNER)
+                return BadRequest("User needs to be owner to give car access");
+
             db.CarAccess.Remove(carAccess);
-            db.SaveChanges();
+            // db.SaveChanges();
 
             return Ok(carAccess);
         }
