@@ -168,10 +168,65 @@ namespace CarlistApi.Controllers
             return CreatedAtRoute("DefaultApi", new { id = carAccess.Id }, carAccess);
         }
 
+        // GET: api/caraccess/get-all-car-permissions
+        [HttpGet]
+        [Route("api/caraccess/get-all-car-permissions/{carId}")]
+        [ResponseType(typeof(CarAccess))]
+        public IHttpActionResult GetAllUserCarPermissions(int carId)
+        {
+            if (!Helper.isAuthorizedJWT())
+                return BadRequest("Bad token");
+
+            var carEntity = db.CarInformation.Any(ci => ci.Id == carId);
+            if (!carEntity)
+                return BadRequest("Car does not exit");
+
+            var userHasCarPermission = Helper.UserHasCarPermission(carId);
+            if (userHasCarPermission != Helper.PermissionType.OWNER)
+                return BadRequest("User needs to be owner to give car access");
+
+            var permittedUsers = db.CarAccess.Where(s => s.CarInformationId == carId);
+            var allUserAccounts = db.UserAccounts.Select(x => 
+                new { 
+                    id = x.Id,
+                    username = x.Username,
+                    email = x.Email,
+                }
+            );
+
+            Dictionary<int, object> userObject = new Dictionary<int, object>();
+  
+            foreach (var _user in allUserAccounts)
+            {
+                userObject.Add(_user.id, _user);
+            }
+
+            IList<UserInfo> subjects = new List<UserInfo>();
+            dynamic _userObject = userObject;
+            foreach (var user in permittedUsers)
+            {
+
+                var userInfo = new UserInfo();
+                userInfo.UserId = user.Id;
+                userInfo.Username = _userObject[user.UserAccountId].username;
+                userInfo.Email = _userObject[user.UserAccountId].email;
+                userInfo.Write = user.Write;
+                userInfo.CreatedTime = user.CreatedTime;
+
+                subjects.Add(userInfo);
+            }
+
+
+            return Ok(subjects);
+        }
+
         // DELETE: api/CarAccesses/5
         [ResponseType(typeof(CarAccess))]
         public IHttpActionResult DeleteCarAccess(int id) // replace caraccess with postobject of userId and carInfoId
         {
+            // GET ALL USERS WHO HAVE ACCES TO THE CAR
+            // POST USERS ACCESS TO GAIN ACCESS TO THE CAR
+            // DELETE USER FROM ACCESS TO CAR
             CarAccess carAccess = db.CarAccess.Find(id);
             if (carAccess == null)
             {
@@ -210,6 +265,16 @@ namespace CarlistApi.Controllers
             public string Username { get; set; }
             public int CarInformationId { get; set; }
             public bool Write { get; set; }
+        }
+
+        public class UserInfo
+        {
+            public int UserId { get; set; }
+            public string Username { get; set; }
+            public string Email { get; set; }
+            public Nullable<bool> Write { get; set; }
+            public System.DateTime CreatedTime { get; set; }
+
         }
     }
 }
