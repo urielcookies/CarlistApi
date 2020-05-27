@@ -224,9 +224,9 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarAccess))]
         public IHttpActionResult DeleteCarAccess(int id) // replace caraccess with postobject of userId and carInfoId
         {
-            // GET ALL USERS WHO HAVE ACCES TO THE CAR
-            // POST USERS ACCESS TO GAIN ACCESS TO THE CAR
-            // DELETE USER FROM ACCESS TO CAR
+            // GET ALL USERS WHO HAVE ACCES TO THE CAR (DONE)
+            // POST USERS ACCESS TO GAIN ACCESS TO THE CAR (DONE)
+            // DELETE USER FROM ACCESS TO CAR (confirm not yet use bottom maybe)
             CarAccess carAccess = db.CarAccess.Find(id);
             if (carAccess == null)
             {
