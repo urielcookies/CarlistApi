@@ -226,7 +226,7 @@ namespace CarlistApi.Controllers
         {
             // GET ALL USERS WHO HAVE ACCES TO THE CAR (DONE)
             // POST USERS ACCESS TO GAIN ACCESS TO THE CAR (DONE)
-            // DELETE USER FROM ACCESS TO CAR (confirm not yet use bottom maybe)
+            // DELETE USER FROM ACCESS TO CAR (confirm not yet use bottom maybe .)
             CarAccess carAccess = db.CarAccess.Find(id);
             if (carAccess == null)
             {
