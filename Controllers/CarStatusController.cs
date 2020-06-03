@@ -55,8 +55,10 @@ namespace CarlistApi.Controllers
         }
 
         // PUT: api/CarStatus/5
-        [ResponseType(typeof(void))]
-        public IHttpActionResult PutCarStatus(int id, CarStatus carStatus)
+        [HttpPut]
+        [Route("api/carstatus")]
+        [ResponseType(typeof(CarStatus))]
+        public IHttpActionResult PutCarStatus(CarStatusObj carStatus)
         {
             if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
@@ -66,36 +68,18 @@ namespace CarlistApi.Controllers
                 return BadRequest("User has no access");
 
             if (userHasCarPermission == Helper.PermissionType.READ)
-                return BadRequest("User has no permission to post image");
+                return BadRequest("User has no permission to change");
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var carEntity = db.CarStatus.FirstOrDefault(ci => ci.CarInformationId == carStatus.CarInformationId);
+            
+            if (carEntity == null)
+                return BadRequest("Car does not exit");
 
-            if (id != carStatus.Id)
-            {
-                return BadRequest();
-            }
+            carEntity.Sold = carStatus.Sold;
+            carEntity.PriceSold = carStatus.PriceSold;
+            carEntity.YearSold = carStatus.YearSold;
 
-            db.Entry(carStatus).State = EntityState.Modified;
-
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CarStatusExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            db.SaveChanges();
             return StatusCode(HttpStatusCode.NoContent);
         }
 
@@ -173,6 +157,13 @@ namespace CarlistApi.Controllers
         private bool CarStatusExists(int id)
         {
             return db.CarStatus.Count(e => e.Id == id) > 0;
+        }
+        public class CarStatusObj
+        {
+            public int CarInformationId { get; set; }
+            public int PriceSold { get; set; }
+            public bool Sold { get; set; }
+            public short YearSold { get; set; }
         }
     }
 }
