@@ -130,19 +130,21 @@ namespace CarlistApi.Controllers
         //}
 
         // DELETE: api/CarStatus/5
+        [HttpPut]
+        [Route("api/carstatus/{carId}")]
         [ResponseType(typeof(CarStatus))]
-        public IHttpActionResult DeleteCarStatus(int id)
+        public IHttpActionResult DeleteCarStatus(int carId)
         {
-            CarStatus carStatus = db.CarStatus.Find(id);
-            if (carStatus == null)
+            CarStatus carEntity = db.CarInformation.Find(carId);
+            if (carEntity == null)
             {
                 return NotFound();
             }
 
-            db.CarStatus.Remove(carStatus);
+            db.CarStatus.Remove(carEntity);
             db.SaveChanges();
 
-            return Ok(carStatus);
+            return Ok(carEntity);
         }
 
         protected override void Dispose(bool disposing)
