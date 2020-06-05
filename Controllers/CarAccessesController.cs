@@ -224,7 +224,6 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarAccess))]
         public IHttpActionResult DeleteCarAccess(int carId) // replace caraccess with postobject of userId and carInfoId
         {
-
             if (!Helper.isAuthorizedJWT())
                 return BadRequest("Bad token");
 
