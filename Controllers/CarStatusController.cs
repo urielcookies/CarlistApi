@@ -130,12 +130,10 @@ namespace CarlistApi.Controllers
         //}
 
         // DELETE: api/CarStatus/5
-        [HttpPut]
-        [Route("api/carstatus/{carId}")]
         [ResponseType(typeof(CarStatus))]
-        public IHttpActionResult DeleteCarStatus(int carId)
+        public IHttpActionResult DeleteCarStatus(int id)
         {
-            CarStatus carStatus = db.CarStatus.FirstOrDefault(cs => cs.CarInformationId == carId);
+            CarStatus carStatus = db.CarStatus.Find(id);
             if (carStatus == null)
             {
                 return NotFound();
