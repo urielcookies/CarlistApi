@@ -135,16 +135,16 @@ namespace CarlistApi.Controllers
         [ResponseType(typeof(CarStatus))]
         public IHttpActionResult DeleteCarStatus(int carId)
         {
-            CarStatus carEntity = db.CarInformation.Find(carId);
-            if (carEntity == null)
+            CarStatus carStatus = db.CarStatus.FirstOrDefault(cs => cs.CarInformationId == carId);
+            if (carStatus == null)
             {
                 return NotFound();
             }
 
-            db.CarStatus.Remove(carEntity);
+            db.CarStatus.Remove(carStatus);
             db.SaveChanges();
 
-            return Ok(carEntity);
+            return Ok(carStatus);
         }
 
         protected override void Dispose(bool disposing)
