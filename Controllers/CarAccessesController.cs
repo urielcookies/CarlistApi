@@ -220,6 +220,33 @@ namespace CarlistApi.Controllers
             return Ok(subjects);
         }
 
+        // PUT: api/CarStatus/5
+        [HttpPut]
+        [Route("api/caraccess")]
+        [ResponseType(typeof(CarAccess))]
+        public IHttpActionResult PutCarStatus(CarAccessObj carAccess)
+        {
+            if (!Helper.isAuthorizedJWT())
+                return BadRequest("Bad token");
+
+            var userHasCarPermission = Helper.UserHasCarPermission(carAccess.CarInformationId);
+            if (userHasCarPermission == Helper.PermissionType.NONE)
+                return BadRequest("User has no access");
+
+            if (userHasCarPermission == Helper.PermissionType.READ)
+                return BadRequest("User has no permission to change");
+
+            var carEntity = db.CarAccess.FirstOrDefault(ci => ci.CarInformationId == carAccess.CarInformationId);
+
+            if (carEntity == null)
+                return BadRequest("Car does not exit");
+
+            carEntity.Write = carAccess.WriteBool;
+
+            db.SaveChanges();
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
         // DELETE: api/CarAccesses/5
         [ResponseType(typeof(CarAccess))]
         public IHttpActionResult DeleteCarAccess(int carId) // replace caraccess with postobject of userId and carInfoId
@@ -270,6 +297,12 @@ namespace CarlistApi.Controllers
             public Nullable<bool> Write { get; set; }
             public System.DateTime CreatedTime { get; set; }
 
+        }
+
+        public class CarAccessObj
+        {
+            public int CarInformationId { get; set; }
+            public bool WriteBool { get; set; }
         }
     }
 }
