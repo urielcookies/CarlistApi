@@ -70,8 +70,15 @@ namespace CarlistApi.Controllers
             if (userHasCarPermission != Helper.PermissionType.OWNER)
                 return BadRequest("User needs to be owner to give car access");
 
+            if (!Helper.isAuthorizedJWT())
+                return BadRequest("Access exists for this user");
+
             var userId = db.UserAccounts
                 .FirstOrDefault(ua => ua.Username.ToLower() == giveCarAccess.Username.ToLower()).Id;
+
+            var carAccessEntity = db.CarAccess.Any(ca => ca.UserAccountId == userId);
+            if (!carAccessEntity)
+                return BadRequest("Access exists for this user");
 
             var carAccess = new CarAccess();
             carAccess.UserAccountId = userId;
